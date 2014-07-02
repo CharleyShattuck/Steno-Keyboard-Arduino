@@ -38,10 +38,11 @@ void loop() {
 //  }
   do {scan();} while(!pressed);
   delay(5); // Debounce the first key pressed for 5 ms
-  while(pressed) {
+  do {
     do {scan();} while(pressed);
-    delay(5);
-  }  // Debounce the last release
+    delay(10);
+  }
+  while(pressed); // Debounce the last release
   TXBolt(); // Serial could take 4 ms minimum, add 1 more delay to debounce
 //  scan(); // debug scan without pressed
 //  show();
