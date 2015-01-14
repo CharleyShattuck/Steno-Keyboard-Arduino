@@ -1,30 +1,42 @@
 // This example program is in the public domain
 
+// each key switch is connected to a unique I/O pin on one side
+// which is weakly pulled high, and ground on the other.
+// Pressing the key connects the pin to ground, pulling it low.
+
 boolean pressed = false;
 
+// the four bytes of the TX Bolt protocol
 byte val0 = 0;
 byte val1 = 0;
 byte val2 = 0;
 byte val3 = 0;
 
 void setup() {
+// all pins weakly pulled high  
   for (int i=30; i<54; i++) {
     pinMode(i, INPUT_PULLUP);
     }
+// LED on while key pressed    
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);  // Turn off LED
   Serial.begin(9600);
 }
 
 void loop() {
+// accumulate keys  
   do { scan(); } while (!pressed);
+// until all keys released  
   do { scan(); } while (pressed);
+// debounce the release  
   delay(50);
 //  show();  // debug
   give();  // TX Bolt Protocol
   empty();
 }
 
+// read and accumulate keypresses
+// one key at a time
 void scan() {
   pressed = false;
 
@@ -56,6 +68,9 @@ void scan() {
   val3 = getKey(38, 16, val3);
 } 
 
+// k = Arduino pin number
+// b = bit mask for TX Bolt bit position
+// v = current protocol byte
 byte getKey(int k, byte b, byte v) {
   int val = digitalRead(k);
   if (val == 0) {
@@ -80,6 +95,7 @@ void space() {
   Serial.print(" ");
 }
 
+// show accumulated bytes on terminal
 void show() {
   Serial.print(val0, HEX);
   space();
@@ -91,6 +107,8 @@ void show() {
   cr();
 }
 
+// send TX bytes over serial,
+// then clear buffers
 void give() {
   Serial.write(val0);
   val1 = val1 | 64;
