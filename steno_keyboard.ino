@@ -26,6 +26,7 @@ void setup() {
 void loop() {
 // accumulate keys  
   do { scan(); } while (!pressed);
+  delay(10); // Debounces 1st keypress
 // until all keys released  
   do { scan(); } while (pressed);
 // debounce the release  
