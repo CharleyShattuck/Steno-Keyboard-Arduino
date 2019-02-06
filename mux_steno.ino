@@ -19,14 +19,18 @@ const byte row[]={9, 10, 11, 12};
 #define NO_COLS 6
 const byte column[]={A0, A1, A2, A3, A4, A5};
 
+// protocol choice on this  pin
+#define PROTOCOL 7  // TinyMod 2
+// #define PROTOCOL 8  // TinyMod 1
+
 void setup() {
   for(int i=0; i<NO_COLS; i++)  pinMode(column[i], INPUT_PULLUP);
   for(int i=0; i<NO_ROWS; i++){
     pinMode(row[i], OUTPUT); digitalWrite(row[i], HIGH);
   }
-  pinMode(8, INPUT_PULLUP);
+  pinMode(PROTOCOL, INPUT_PULLUP);
   pinMode(13, OUTPUT); digitalWrite(13, HIGH);
-  if(digitalRead(8)){
+  if(digitalRead(PROTOCOL)){
     TX_Bolt(); // no shunt installed
   }else{
     NKRO_keyboard(); // shunt is installed
