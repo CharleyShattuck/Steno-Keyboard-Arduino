@@ -98,6 +98,9 @@ void layer() {  // this changes if we make an A key
   if (right &  0x04) Keyboard.write('7');
   if (right & 0x10) Keyboard.write('8');
   if (right & 0x40) Keyboard.write('9');
+  if (center == 0x04) {maybeSpace(); spew("ei", "Ei"); return;}
+  if (center == 0x08) {maybeSpace(); spew("eu", "Eu"); return;}
+  if (center == 0x0c) {maybeSpace(); spew("ie", "Ie"); return;}
   return;
 }
 
@@ -125,7 +128,8 @@ int preprocess() {
       if(right == 0x01) {spit("'re"); return 1;}
     }
     if((left == 0xa0) & (right == 0x0a)) {
-      Keyboard.write(KEY_RETURN); caps = true; return 1;
+      Keyboard.write(KEY_RETURN);
+      caps = true; spacing = false; return 1;
     }
   }
   return 0;
@@ -236,15 +240,21 @@ void sendLeft() {
 
 void sendCenter() {
   switch(center) {
-    case 0x01 : {spew("a", "A"); break;}
-    case 0x02 : {spew("o", "O"); break;}
-    case 0x04 : {spew("e", "E"); break;}
-    case 0x08 : {spew("u", "U"); break;}
-    case 0x0d : {spew("ai", "Ai"); break;} 
-    case 0x09 : {spew("au", "Au"); break;}
-    case 0x05 : {spew("ea", "Ea"); break;}
-    case 0x07 : {spew("ee", "Ee"); break;}
-    case 0x0c : {
+    case 0x01 : {spew("a", "A"); break;} // A
+    case 0x02 : {spew("o", "O"); break;} // O
+    case 0x03 : {spew("oa", "Oa"); break;} // AO
+    case 0x04 : {spew("e", "E"); break;} // E
+    case 0x05 : {spew("ea", "Ea"); break;} // AE
+    case 0x06 : {spew("eo", "Eo"); break;} // OE
+    case 0x07 : {spew("ee", "Ee"); break;} // AOE
+    case 0x08 : {spew("u", "U"); break;} // U
+    case 0x09 : {spew("au", "Au"); break;} // AU
+    case 0x0a : {spew("ou", "Ou"); break;} // OU
+    case 0x0b : {spew("oo", "Oo"); break;} // AOU
+    case 0x0c : {spew("io", "Io");} break; // EU
+    case 0x0d : {spew("ai", "Ai"); break;} // AEU
+    case 0x0e : {spew("oi", "Oi"); break;} // OEU
+    case 0x0f : {
       if (!left & !right) {
         spit("I"); caps = false;
       } else {
@@ -252,14 +262,7 @@ void sendCenter() {
       }
       break;
     }
-    case 0x06 : {spew("oe", "Oe"); break;}
-    case 0x03 : {spew("io", "Io"); break;}
-    case 0x0e : {spew("oi", "Oi"); break;}
-    case 0x0b : {spew("oo", "Oo"); break;}
-    case 0x0a : {spew("ou", "Ou"); break;}
-    case 0x0f : {spew("ie", "Ie"); break;
     default : ;
-    }
   }
 }
 
@@ -540,11 +543,11 @@ void scan(){
 void run() {
   scan(); if(leaving) return;
   organize();
-  if (number) {layer(); return;}
-  if (preprocess()) return;
-  if (star & number & !right & !center & !left) {
-    caps = true; return;
+  if ((number) & (!star) & (!(vowels & 0x0c))) {
+    layer(); return;
   }
+  if (preprocess()) return;
+  if (star & number) caps = true;
   maybeSpace();
   sendLeft();
   sendCenter();
