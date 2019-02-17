@@ -99,8 +99,8 @@ void layer() {  // this changes if we make an A key
   if (right & 0x10) Keyboard.write('8');
   if (right & 0x40) Keyboard.write('9');
   if (center == 0x04) {maybeSpace(); spew("ei", "Ei"); return;}
-  if (center == 0x08) {maybeSpace(); spew("eu", "Eu"); return;}
-  if (center == 0x0c) {maybeSpace(); spew("ie", "Ie"); return;}
+  if (center == 0x0c) {maybeSpace(); spew("eu", "Eu"); return;}
+  if (center == 0x08) {maybeSpace(); spew("ie", "Ie"); return;}
   return;
 }
 
@@ -114,22 +114,55 @@ int preprocess() {
       if(right == 0x28) {Keyboard.write(','); return 1;}
       if(right == 0x14) {Keyboard.write('?'); caps = true; return 1;}
     }
-    if(left == 0xaa) {
-      if(right == 0x2a) {caps = true; spacing = false; return 1;}
-      if(right == 0xaa) {caps = true; spacing = true; return 1;}
-      if(right == 0x55) {Keyboard.write(KEY_ESC); return 1;}
-    }
     if(left == 0x2a) {
+      if(right == 0x00) {spit("'"); return 1;}
+      if(right == 0x0e) {spit("'d"); return 1;}
+      if(right == 0xb0) {spit("'d"); return 1;}
       if(right == 0x40) {spit("'t"); return 1;}
       if(right == 0x80) {spit("'s"); return 1;}
       if(right == 0x2a) {spit("'m"); return 1;}
       if(right == 0x42) {spit("n't"); return 1;}
-      if(right == 0x2c) {spit("'d"); return 1;}
       if(right == 0x01) {spit("'re"); return 1;}
+      if(right == 0x04) {spit("'ll"); return 1;}
+      if(right == 0x22) {spit("'ve"); return 1;}
     }
     if((left == 0xa0) & (right == 0x0a)) {
       Keyboard.write(KEY_RETURN);
       caps = true; spacing = false; return 1;
+    }
+    if(left == 0xaa) {
+      if(right == 0xa8) {caps = true; spacing = false; return 1;}
+      if(right == 0xaa) {caps = true; spacing = true; return 1;}
+      if(right == 0x55) {Keyboard.write(KEY_ESC); return 1;}
+      if(right == 0x15) {Keyboard.write(KEY_HOME); return 1;}
+      if(right == 0x2a) {Keyboard.write(KEY_END); return 1;}
+      if(right == 0x26) {Keyboard.write(KEY_PAGE_UP); return 1;}
+      if(right == 0x19) {Keyboard.write(KEY_PAGE_DOWN); return 1;}
+      if(right == 0x0a) {
+        Keyboard.press(KEY_LEFT_CTRL);
+        Keyboard.write(KEY_LEFT_ARROW);
+        Keyboard.release(KEY_LEFT_CTRL);
+        return 1;
+      }
+      if(right == 0x28) {
+        Keyboard.press(KEY_LEFT_CTRL);
+        Keyboard.write(KEY_RIGHT_ARROW);
+        Keyboard.release(KEY_LEFT_CTRL);
+        return 1;
+      }
+      if(right == 0x3f) {Keyboard.write(KEY_CAPS_LOCK); return 1;}
+    }
+    if(right == 0x13) {
+      if(left == 0x94) {maybeSpace(); spit("("); spacing = false; return 1;}
+      if(left == 0xbc) {maybeSpace(); spit("["); spacing = false; return 1;}
+      if(left == 0xac) {maybeSpace(); spit("{"); spacing = false; return 1;}
+      if(left == 0x40) {maybeSpace(); spit("<"); spacing = false; return 1;}
+    }
+    if(right == 0x8c) {
+      if(left == 0x94) {spit(")"); return 1;}
+      if(left == 0xbc) {spit("]"); return 1;}
+      if(left == 0xac) {spit("}"); return 1;}
+      if(left == 0x40) {spit(">"); return 1;}
     }
   }
   return 0;
@@ -251,17 +284,17 @@ void sendCenter() {
     case 0x09 : {spew("au", "Au"); break;} // AU
     case 0x0a : {spew("ou", "Ou"); break;} // OU
     case 0x0b : {spew("oo", "Oo"); break;} // AOU
-    case 0x0c : {spew("io", "Io");} break; // EU
-    case 0x0d : {spew("ai", "Ai"); break;} // AEU
-    case 0x0e : {spew("oi", "Oi"); break;} // OEU
-    case 0x0f : {
-      if (!left & !right) {
+    case 0x0c : {
+      if (!left & !right & (!star)) {
         spit("I"); caps = false;
       } else {
         spew("i", "I");
       }
       break;
     }
+    case 0x0d : {spew("ai", "Ai"); break;} // AEU
+    case 0x0e : {spew("oi", "Oi"); break;} // OEU
+    case 0x0f : {spew("io", "Io");} break; // EU
     default : ;
   }
 }
@@ -509,18 +542,11 @@ boolean movement() {
     moving(KEY_BACKSPACE); return 1;
   }
   if((data[0] == 0x15) & (data[1] == 0x01) & (data[3] == 0)) {
-    if(data[2] == 0x02) {
-      moving(KEY_LEFT_ARROW); return 1;
-    }
-    if(data[2] == 0x04) {
-      moving(KEY_UP_ARROW); return 1;
-    }
-    if(data[2] == 0x08) {
-      moving(KEY_DOWN_ARROW); return 1;
-    }
-    if(data[2] == 0x20) {
-      moving(KEY_RIGHT_ARROW); return 1;
-    }
+    delay(20); // debounce the key, so to speak?
+    if(data[2] == 0x02) {moving(KEY_LEFT_ARROW); return 1;}
+    if(data[2] == 0x04) {moving(KEY_UP_ARROW); return 1;}
+    if(data[2] == 0x08) {moving(KEY_DOWN_ARROW); return 1;}
+    if(data[2] == 0x20) {moving(KEY_RIGHT_ARROW); return 1;}
   }
   return 0;
 }
