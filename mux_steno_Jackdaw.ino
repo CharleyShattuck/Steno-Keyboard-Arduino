@@ -87,24 +87,49 @@ void maybeSpace() {
   if (!star & spacing) Keyboard.write(' ');
 }
 
-void layer() {  // this changes if we make an A key
+void layer() { // number key is pressed if we got here
+  if (data[3] & 0x04) {
+    if (left & 0x02) {spit("11"); return;}
+    if (left & 0x04) {spit("22"); return;}
+    if (left & 0x10) {spit("33"); return;}
+    if (left & 0x40) {spit("44"); return;}
+    if (left & 0x80) {spit("55"); return;}
+    if (right & 0x02) {spit("00"); return;}
+    if (right &  0x01) {spit("66"); return;}
+    if (right &  0x04) {spit("77"); return;}
+    if (right & 0x10) {spit("88"); return;}
+    if (right & 0x40) {spit("99"); return;}
+  }
+  if (right & 0x80) {
+    if (right & 0x40) Keyboard.write('9');
+    if (right & 0x10) Keyboard.write('8');
+    if (right & 0x04) Keyboard.write('7');
+    if (right & 0x01) Keyboard.write('6');
+    if (right & 0x02) Keyboard.write('0');
+    if (left & 0x80) Keyboard.write('5');
+    if (left & 0x40) Keyboard.write('4');
+    if (left & 0x10) Keyboard.write('3');
+    if (left & 0x04) Keyboard.write('2');
+    if (left & 0x02) Keyboard.write('1');
+    return;
+  }
   if (left & 0x02) Keyboard.write('1');
   if (left & 0x04) Keyboard.write('2');
   if (left & 0x10) Keyboard.write('3');
   if (left & 0x40) Keyboard.write('4');
-  if (center & 0x01) Keyboard.write('5');
-  if (center & 0x02) Keyboard.write('0');
-  if (right &  0x01) Keyboard.write('6');
-  if (right &  0x04) Keyboard.write('7');
+  if (left & 0x80) Keyboard.write('5');
+  if (right & 0x02) Keyboard.write('0');
+  if (right & 0x01) Keyboard.write('6');
+  if (right & 0x04) Keyboard.write('7');
   if (right & 0x10) Keyboard.write('8');
   if (right & 0x40) Keyboard.write('9');
-  if (center == 0x04) {maybeSpace(); spew("ei", "Ei"); return;}
-  if (center == 0x0c) {maybeSpace(); spew("eu", "Eu"); return;}
-  if (center == 0x08) {maybeSpace(); spew("ie", "Ie"); return;}
   return;
 }
 
 int preprocess() {
+  if((center == 0x0c) & (left == 0xaa)) {
+    maybeSpace(); spit("I"); spacing = true; caps = false; return 1;
+  }
   if(center == 0) {
     if(left == 0x14) {
       if(right == 0x14) {Keyboard.write('.'); caps = true; return 1;}
@@ -114,12 +139,13 @@ int preprocess() {
       if(right == 0x28) {Keyboard.write(','); return 1;}
       if(right == 0x14) {Keyboard.write('?'); caps = true; return 1;}
     }
-    if(left == 0x2a) {
+    if(left == 0xf0) { // contractions
       if(right == 0x00) {spit("'"); return 1;}
       if(right == 0x0e) {spit("'d"); return 1;}
       if(right == 0xb0) {spit("'d"); return 1;}
       if(right == 0x40) {spit("'t"); return 1;}
       if(right == 0x80) {spit("'s"); return 1;}
+      if(right == 0x06) {spit("'s"); return 1;}
       if(right == 0x2a) {spit("'m"); return 1;}
       if(right == 0x42) {spit("n't"); return 1;}
       if(right == 0x01) {spit("'re"); return 1;}
@@ -128,11 +154,17 @@ int preprocess() {
     }
     if((left == 0xa0) & (right == 0x0a)) {
       Keyboard.write(KEY_RETURN);
+      spacing = false; return 1;
+    }
+    if((left == 0x80) & (right == 0x02)) {
+      Keyboard.write(KEY_RETURN);
       caps = true; spacing = false; return 1;
     }
     if(left == 0xaa) {
+      if(right == 0x16) {spit(" "); spacing = false; return 1;}
       if(right == 0xa8) {caps = true; spacing = false; return 1;}
       if(right == 0xaa) {caps = true; spacing = true; return 1;}
+      if(right == 0x28) {caps = false; return 1;}
       if(right == 0x55) {Keyboard.write(KEY_ESC); return 1;}
       if(right == 0x15) {Keyboard.write(KEY_HOME); return 1;}
       if(right == 0x2a) {Keyboard.write(KEY_END); return 1;}
@@ -152,17 +184,73 @@ int preprocess() {
       }
       if(right == 0x3f) {Keyboard.write(KEY_CAPS_LOCK); return 1;}
     }
-    if(right == 0x13) {
+    if(right == 0x13) { // rnc open
       if(left == 0x94) {maybeSpace(); spit("("); spacing = false; return 1;}
       if(left == 0xbc) {maybeSpace(); spit("["); spacing = false; return 1;}
       if(left == 0xac) {maybeSpace(); spit("{"); spacing = false; return 1;}
       if(left == 0x40) {maybeSpace(); spit("<"); spacing = false; return 1;}
+      if(left == 0xc8) {maybeSpace(); spit("\""); spacing = false; return 1;}
+      if(left == 0x08) {maybeSpace(); spit("'"); spacing = false; return 1;}
+      if(left == 0x02) {maybeSpace(); spit("*"); spacing = false; return 1;}
     }
-    if(right == 0x8c) {
-      if(left == 0x94) {spit(")"); return 1;}
-      if(left == 0xbc) {spit("]"); return 1;}
-      if(left == 0xac) {spit("}"); return 1;}
-      if(left == 0x40) {spit(">"); return 1;}
+    if(right == 0x8c) { // lgs close
+      if(left == 0x94) {spit(")"); return 1;} // pr paren
+      if(left == 0xbc) {spit("]"); return 1;} // br bracket
+      if(left == 0xac) {spit("}"); return 1;} // fr French
+      if(left == 0x40) {spit(">"); return 1;} // n angle
+      if(left == 0xc8) {spit("\""); return 1;} // q quote
+      if(left == 0x08) {spit("'"); return 1;} // t tick
+      if(left == 0x02) {spit("*"); return 1;} // star
+    }
+    if (right == 0x55) {  // rlct
+      if (left == 0x08) {spit("~"); return 1;} // Tilde
+      if (left == 0x60) {spit("@"); return 1;} // Yat
+      if (left == 0x20) {spit("#"); return 1;} // Hash
+      if (left == 0x0c) {spit("$"); return 1;} // Dollar
+      if (left == 0x14) {spit("%"); return 1;} // Percent
+      if (left == 0x84) {spit("^"); return 1;} // CaRat
+      if (left == 0x50) {spit("&"); return 1;} // aMpesand
+      if (left == 0x02) {spit("*"); return 1;} // Star
+      if (left == 0xd4) {spit("+"); return 1;} // PLus
+      if (left == 0xc8) {spit("="); return 1;} // eQual
+      if (left == 0xc2) {spit("/"); return 1;} // SLash
+      if (left == 0x3c) {spit("\\"); return 1;} // Backslash
+      if (left == 0xc4) {spit(":"); return 1;} // CoLon
+      if (left == 0x06) {spit(";"); return 1;} // SemiColon
+      if (left == 0x0e) {spit("`"); return 1;} // Grave
+      if (left == 0xcc) {Keyboard.write(KEY_DELETE); return 1;} // DeLete
+      if (left == 0x40) {Keyboard.write(KEY_INSERT); return 1;} // iNseRt
+      if (left == 0x8c) {spit("_"); return 1;} // unDeRscore
+      if (left == 0x2c) {spit("-"); return 1;} // DasH
+    }
+    if(right == 0xc3) { // left modifiers
+      if(left == 0x04) {Keyboard.press(KEY_LEFT_CTRL); return 1;}
+      if(left == 0x02) {Keyboard.press(KEY_LEFT_SHIFT); return 1;}
+      if(left == 0xc0) {Keyboard.press(KEY_LEFT_ALT); return 1;}
+      if(left == 0x0e) {Keyboard.press(KEY_LEFT_GUI); return 1;}
+      Keyboard.releaseAll(); return 1;
+    }
+    if(right == 0xcc) { // right modifiers
+      if(left == 0x04) {Keyboard.press(KEY_RIGHT_CTRL); return 1;}
+      if(left == 0x02) {Keyboard.press(KEY_RIGHT_SHIFT); return 1;}
+      if(left == 0xc0) {Keyboard.press(KEY_RIGHT_ALT); return 1;}
+      if(left == 0x0e) {Keyboard.press(KEY_RIGHT_GUI); return 1;}
+      Keyboard.releaseAll(); return 1;
+    }
+    if(left == 0x98) { // function keys
+      if(right == 0x26) {Keyboard.write(KEY_TAB); return 1;}
+      if(right == 0x01) {Keyboard.write(KEY_F1); return 1;}
+      if(right == 0x04) {Keyboard.write(KEY_F2); return 1;}
+      if(right == 0x10) {Keyboard.write(KEY_F3); return 1;}
+      if(right == 0x40) {Keyboard.write(KEY_F4); return 1;}
+      if(right == 0x02) {Keyboard.write(KEY_F5); return 1;}
+      if(right == 0x08) {Keyboard.write(KEY_F6); return 1;}
+      if(right == 0x20) {Keyboard.write(KEY_F7); return 1;}
+      if(right == 0x80) {Keyboard.write(KEY_F8); return 1;}
+      if(right == 0x03) {Keyboard.write(KEY_F9); return 1;}
+      if(right == 0x0c) {Keyboard.write(KEY_F10); return 1;}
+      if(right == 0x30) {Keyboard.write(KEY_F11); return 1;}
+      if(right == 0xc0) {Keyboard.write(KEY_F12); return 1;}
     }
   }
   return 0;
@@ -272,29 +360,35 @@ void sendLeft() {
 }
 
 void sendCenter() {
+  if (number) {
+    if (center == 0x01) {spew("ia", "Ia"); return;} // A
+    if (center == 0x03) {spew("ao", "Ao"); return;} // AO
+    if (center == 0x02) {spew("oo", "Oo"); return;} // O
+    if (center == 0x06) {spew("eo", "Eo"); return;} // OE
+    if (center == 0x0c) {spew("eu", "Eu"); return;} // EU
+    if (center == 0x05) {spew("ae", "Ae"); return;} // AE
+    if (center == 0x0a) {spew("uo", "Uo"); return;} // OU
+    if (center == 0x0e) {spew("io", "Io"); return;} // OEU
+    if (center == 0x07) {spew("ei", "Ei"); return;} // AOE
+    if (center == 0x08) {spew("ua", "Ua"); return;} // U
+    if (center == 0x04) {spew("ee", "Ee"); return;} // E
+  }
   switch(center) {
     case 0x01 : {spew("a", "A"); break;} // A
     case 0x02 : {spew("o", "O"); break;} // O
     case 0x03 : {spew("oa", "Oa"); break;} // AO
     case 0x04 : {spew("e", "E"); break;} // E
     case 0x05 : {spew("ea", "Ea"); break;} // AE
-    case 0x06 : {spew("eo", "Eo"); break;} // OE
-    case 0x07 : {spew("ee", "Ee"); break;} // AOE
+    case 0x06 : {spew("oe", "Oe"); break;} // OE
+    case 0x07 : {spew("ie", "Ie"); break;} // AOE
     case 0x08 : {spew("u", "U"); break;} // U
     case 0x09 : {spew("au", "Au"); break;} // AU
     case 0x0a : {spew("ou", "Ou"); break;} // OU
-    case 0x0b : {spew("oo", "Oo"); break;} // AOU
-    case 0x0c : {
-      if (!left & !right & (!star)) {
-        spit("I"); caps = false;
-      } else {
-        spew("i", "I");
-      }
-      break;
-    }
+    case 0x0b : {spew("ui", "Ui"); break;} // AOU
+    case 0x0c : {spew("i", "I");break;} // EU
     case 0x0d : {spew("ai", "Ai"); break;} // AEU
     case 0x0e : {spew("oi", "Oi"); break;} // OEU
-    case 0x0f : {spew("io", "Io");} break; // EU
+    case 0x0f : {spew("iu", "Iu");} break; // AOEU
     default : ;
   }
 }
@@ -319,7 +413,7 @@ void sendRight() {
     case 0x82 : { spit("ns"); break;}
     case 0x04 : { spit("l"); break;}
     case 0x0c : {
-      if (data[3] == 0x08) {
+      if (data[3] & 0x08) {
         spit("logy");
         skipping = true;
       } else {
@@ -338,7 +432,7 @@ void sendRight() {
     case 0x10 : { spit("c"); break;}
     case 0x30 : { spit("ch"); break;}
     case 0x50 : {
-      if (data[3] == 0x04) {
+      if (data[3] & 0x04) {
         spit("cate");
         skipping = true;
       } else {
@@ -352,7 +446,7 @@ void sendRight() {
     case 0xa0 : { spit("hs"); break;}
     case 0x40 : { spit("t"); break;}
     case 0xc0 : {
-      if (data[3] == 0x08) {
+      if (data[3] & 0x08) {
         spit("ys");
         skipping = true;
       } else {
@@ -409,7 +503,7 @@ void sendRight() {
     case 0xa8 : { spit("ghs"); break;}  // ghs
     case 0x1c8 : {spit("kes"); break;} // gtse
     case 0xc8 : {
-      if (data[3] == 0x04) {
+      if (data[3] & 0x04) {
         spit("kes");
         skipping = true;
       } else {
@@ -503,7 +597,7 @@ void sendRight() {
     case 0xbe : { spit("mps"); break;}  // nlgchs
     case 0xee : { spit("dths"); break;}  // nlghts
     case 0xf7 : { spit("lds"); break;}  // rnlchts
-    case 0xfd : { spit("mpts"); break;}  // rlgchts
+    case 0xfe : { spit("mpts"); break;}  // nlgchts
   }
 }
 
@@ -539,7 +633,7 @@ void moving(byte a) {
 
 boolean movement() {
   if((data[0] == 0) & (data[1] == 0x08) & (data[2] == 0) & (data[3] == 0)) {
-    moving(KEY_BACKSPACE); return 1;
+    moving(KEY_BACKSPACE); spacing = false; return 1;
   }
   if((data[0] == 0x15) & (data[1] == 0x01) & (data[3] == 0)) {
     delay(20); // debounce the key, so to speak?
@@ -561,19 +655,57 @@ void scan(){
   digitalWrite(13, HIGH);
   do {
     look();
-    if (movement()) { digitalWrite(13, LOW); leaving = true; return;}
+    if (movement()) {digitalWrite(13, LOW); leaving = true; return;}
   } while(pressed);
   digitalWrite(13, LOW);
 }
 
+const char* right_side[] = { "",
+  "r", "n", "rn", "l", "rl", "nl", "rnl",
+  "g", "rg", "ng", "rng", "lg", "rlg", "nlg", "rnlg",
+  "c", "rc", "nc", "rnc", "lc", "rlc", "nlc", "rnlc",
+    "gc", "rgc", "ngc", "rngc", "lgc", "rlgc", "nlgc", "rnlgc",
+  "h", "rh", "nh", "rnh", "lh", "rlh", "nlh", "rnlh",
+    "gh", "rgh", "ngh", "rngh", "lgh", "rlgh", "nlgh",
+    "rnlgh", "ch", "rch", "nch", "rnch", "lch", "rlch",
+    "nlch", "rnlch", "gch", "rgch", "ngch", "rngch",
+    "lgch", "rlgch", "nlgch", "rnlgch",
+  "t","rt", "nt", "rnt", "lt", "rlt", "nlt", "rnlt",
+  "gt", "rgt", "ngt", "rngt", "lgt", "rlgt", "nlgt", "rnlgt",
+  "ct", "rct", "nct", "rnct", "lct", "rlct", "nlct", "rnlct",
+    "gct", "rgct", "ngct", "rngct", "lgct", "rlgct", "nlgct", "rnlgct",
+  "ht", "rht", "nht", "rnht", "lht", "rlht", "nlht", "rnlht",
+    "ght", "rght", "nght", "rnght", "lght", "rlght", "nlght",
+    "rnlght", "cht", "rcht", "ncht", "rncht", "lcht", "rlcht",
+    "nlcht", "rnlcht", "gcht", "rgcht", "ngcht", "rngcht",
+    "lgcht", "rlgcht", "nlgcht", "rnlgcht",
+  "s", "rs", "ns", "rns", "ls", "rls", "nls", "rnls",
+  "gs", "rgs", "ngs", "rngs", "lgs", "rlgs", "nlgs", "rnlgs",
+  "cs", "rcs", "ncs", "rncs", "lcs", "rlcs", "nlcs", "rnlcs",
+    "gcs", "rgcs", "ngcs", "rngcs", "lgcs", "rlgcs", "nlgcs", "rnlgcs",
+  "hs", "rhs", "nhs", "rnhs", "lhs", "rlhs", "nlhs", "rnlhs",
+    "ghs", "rghs", "nghs", "rnghs", "lghs", "rlghs", "nlghs",
+    "rnlghs", "chs", "rchs", "nchs", "rnchs", "lchs", "rlchs",
+    "nlchs", "rnlchs", "gchs", "rgchs", "ngchs", "rngchs",
+    "lgchs", "rlgchs", "nlgchs", "rnlgchs",
+  "ts", "rts", "nts", "rnts", "lts", "rlts", "nlts", "rnlts",
+  "gts", "rgts", "ngts", "rngts", "lgts", "rlgts", "nlgts", "rnlgts",
+  "cts", "rcts", "ncts", "rncts", "lcts", "rlcts", "nlcts", "rnlcts",
+    "gcts", "rgcts", "ngcts", "rngcts", "lgcts", "rlgcts", "nlgcts", "rnlgcts",
+  "hts", "rhts", "nhts", "rnhts", "lhts", "rlhts", "nlhts", "rnlhts",
+    "ghts", "rghts", "nghts", "rnghts", "lghts", "rlghts", "nlghts",
+    "rnlghts", "chts", "rchts", "nchts", "rnchts", "lchts", "rlchts",
+    "nlchts", "rnlchts", "gchts", "rgchts", "ngchts", "rngchts",
+    "lgchts", "rlgchts", "nlgchts", "rnlgchts"
+};
+
 void run() {
   scan(); if(leaving) return;
   organize();
-  if ((number) & (!star) & (!(vowels & 0x0c))) {
+  if ((number) & (!star) & (!center)) {
     layer(); return;
   }
   if (preprocess()) return;
-  if (star & number) caps = true;
   maybeSpace();
   sendLeft();
   sendCenter();
