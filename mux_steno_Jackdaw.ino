@@ -956,7 +956,7 @@ void emit(int ind) {
 void run() {
   scan(); if(leaving) return;
   organize();
-  if(star & !right & !left & !center) {
+  if(star & !right & !left & !center & !(data[3] & 0x0c)) {
     Keyboard.write(KEY_BACKSPACE); spacing = false; return;
   }
   if ((number) & (!star) & (!center)) {
