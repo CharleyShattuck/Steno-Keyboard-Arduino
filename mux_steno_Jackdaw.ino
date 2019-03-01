@@ -71,6 +71,16 @@ void organize(){
 }
 
 void spit(String a) {
+  if(caps) {
+    String s;
+    caps = false;
+    s = a.substring(0, 1);
+    s.toUpperCase();
+    Keyboard.print(s);
+    s = a.substring(1);
+    Keyboard.print(s);
+    return;
+  }
   Keyboard.print(a);
 }
 
@@ -359,6 +369,7 @@ void sendLeft() {
   }
 }
 
+/*
 void sendCenter() {
   if (number) {
     if (center == 0x01) {spew("ia", "Ia"); return;} // A
@@ -390,215 +401,6 @@ void sendCenter() {
     case 0x0e : {spew("oi", "Oi"); break;} // OEU
     case 0x0f : {spew("iu", "Iu");} break; // AOEU
     default : ;
-  }
-}
-
-/*
-void sendRight() {
-  skipping = false;
-  switch(right) {
-    case 0x01 : { spit("r"); break;}
-    case 0x03 : { spit("rn"); break;}
-    case 0x05 : { spit("rl"); break;}
-    case 0x09 : { spit("rg"); break;}
-    case 0x11 : { spit("rc"); break;}
-    case 0x21 : { spit("w"); break;}
-    case 0x41 : { spit("rt"); break;}
-    case 0x81 : { spit("rs"); break;}
-    case 0x02 : { spit("n"); break;}
-    case 0x06 : { spit("s"); break;}
-    case 0x0a : { spit("ng"); break;}
-    case 0x12 : { spit("nc"); break;}
-    case 0x22 : { spit("v"); break;}
-    case 0x42 : { spit("nt"); break;}
-    case 0x82 : { spit("ns"); break;}
-    case 0x04 : { spit("l"); break;}
-    case 0x0c : {
-      if (data[3] & 0x08) {
-        spit("logy");
-        skipping = true;
-      } else {
-        spit("lg");
-      } break; 
-    } // lg
-    case 0x14 : { spit("p"); break;}
-    case 0x24 : { spit("z"); break;}
-    case 0x44 : { spit("lt"); break;}
-    case 0x84 : { spit("ls"); break;}
-    case 0x08 : { spit("g"); break;}
-    case 0x18 : { spit("b"); break;}
-    case 0x28 : { spit("gh"); break;}
-    case 0x48 : { spit("k"); break;}
-    case 0x88 : { spit("gs"); break;}
-    case 0x10 : { spit("c"); break;}
-    case 0x30 : { spit("ch"); break;}
-    case 0x50 : {
-      if (data[3] & 0x04) {
-        spit("cate");
-        skipping = true;
-      } else {
-        spit("ct");
-      }
-      break;
-    } // ct
-    case 0x90 : { spit("cs"); break;}
-    case 0x20 : { spit("h"); break;}
-    case 0x60 : { spit("th"); break;}
-    case 0xa0 : { spit("hs"); break;}
-    case 0x40 : { spit("t"); break;}
-    case 0xc0 : {
-      if (data[3] & 0x08) {
-        spit("ys");
-        skipping = true;
-      } else {
-        spit("ts");
-      }
-      break;
-    } // ts
-    case 0x80 : { spit("s"); break;}
-    case 0x07 : { spit("ll"); break;}
-    case 0x0b : { spit("gn"); break;}
-    case 0x23 : { spit("wn"); break;}
-    case 0x43 : { spit("rnt"); break;}
-    case 0x83 : { spit("rns"); break;}
-    case 0x15 : { spit("rp"); break;}
-    case 0x25 : { spit("wl"); break;}
-    case 0x85 : { spit("rls"); break;}
-    case 0x19 : { spit("rb"); break;}
-    case 0x29 : { spit("rgh"); break;}
-    case 0x49 : { spit("rk"); break;}
-    case 0x89 : { spit("rgs"); break;}
-    case 0x31 : { spit("rch"); break;}
-    case 0x91 : { spit("rcs"); break;}
-    case 0x61 : { spit("rth"); break;}
-    case 0xa1 : { spit("ws"); break;}
-    case 0xc1 : { spit("rts"); break;}
-    case 0x0e : { spit("d"); break;}  // nlg
-    case 0x16 : { spit("sp"); break;}  // nlc
-    case 0x26 : { spit("sh"); break;}  // nlh
-    case 0x46 : { spit("st"); break;}  // nlt
-    case 0x86 : { spit("ss"); break;}  // nls
-    case 0x1a : { spit("gg"); break;}  // ngc
-    case 0x2a : { spit("m"); break;}  // ngh
-    case 0x4a : { spit("nk"); break;}  // ngt
-    case 0x8a : { spit("ngs"); break;}  // ngs
-    case 0x32 : { spit("nch"); break;}  // nch
-    case 0x52 : { spit("tion"); break;}  // nct
-    case 0x92 : { spit("nces"); break;}  // ncs
-    case 0x62 : { spit("nth"); break;}  // nht
-    case 0xa2 : { spit("ves"); break;}  // nhs
-    case 0xc2 : { spit("nts"); break;}  // nts
-    case 0x1c : { spit("bl"); break;}  // lgc
-    case 0x2c : { spit("x"); break;}  // lgh
-    case 0x4c : { spit("kl"); break;}  // lgt
-    case 0x34 : { spit("ph"); break;}  // lch
-    case 0x54 : { spit("pt"); break;}  // lct
-    case 0x94 : { spit("ps"); break;}  // lcs
-    case 0x64 : { spit("lth"); break;}  // lht
-    case 0xa4 : { spit("zes"); break;}  // lhs
-    case 0xc4 : { spit("lts"); break;}  // lts
-    case 0x38 : { spit("f"); break;}  // gch
-    case 0x58 : { spit("ck"); break;}  // gct
-    case 0x98 : { spit("bs"); break;}  // gcs
-    case 0x68 : { spit("ght"); break;}  // ght
-    case 0xa8 : { spit("ghs"); break;}  // ghs
-    case 0x1c8 : {spit("kes"); break;} // gtse
-    case 0xc8 : {
-      if (data[3] & 0x04) {
-        spit("kes");
-        skipping = true;
-      } else {
-        spit("ks");
-      }
-      break;
-    }  // gts
-    case 0x70 : { spit("tch"); break;}  // cht 
-    case 0xb0 : { spit("d"); break;}  // chs 
-    case 0xd0 : { spit("cts"); break;}  // cts 
-    case 0xe0 : { spit("ths"); break;}  // hts
-    case 0xf0 : { spit("dl"); break;}  // rnlg 
-    case 0x17 : { spit("pl"); break;}  // rnlc 
-    case 0x27 : { spit("lv"); break;}  // rnlh 
-    case 0x47 : { spit("rst"); break;}  // rnlt 
-    case 0x87 : { spit("lls"); break;}  // rnls
-    case 0x2b : { spit("rm"); break;}  // rngh 
-    case 0x8b : { spit("gns"); break;}  // rngs 
-    case 0x33 : { spit("rv"); break;}  // rnch 
-    case 0x63 : { spit("wth"); break;}  // rnht 
-    case 0xa3 : { spit("wns"); break;}  // rnhs 
-    case 0x95 : { spit("rps"); break;}  // rlcs 
-    case 0xa5 : { spit("wls"); break;}  // rlhs 
-    case 0x39 : { spit("rf"); break;}  // rgch 
-    case 0x99 : { spit("rbs"); break;}  // rgcs 
-    case 0x69 : { spit("wk"); break;}  // rght 
-    case 0xc9 : { spit("rks"); break;}  // rgts 
-    case 0xb1 : { spit("rd"); break;}  // rchs 
-    case 0xe1 : { spit("rths"); break;}  // rhts 
-    case 0x1e : { spit("ld"); break;}  // nlgc 
-    case 0x2e : { spit("sm"); break;}  // nlgh 
-    case 0x4e : { spit("sk"); break;}  // nlgt 
-    case 0x8e : { spit("ds"); break;}  // nlgs 
-    case 0x56 : { spit("nst"); break;}  // nlct 
-    case 0x96 : { spit("sps"); break;}  // nlcs 
-    case 0xa6 : { spit("shes"); break;}  // nlhs 
-    case 0xc6 : { spit("sts"); break;}  // nlts 
-    case 0x3a : { spit("mb"); break;}  // ngch 
-    case 0x5a : { spit("bt"); break;}  // ngct 
-    case 0x9a : { spit("ggs"); break;}  // ngcs 
-    case 0x6a : { spit("ngth"); break;}  // nght 
-    case 0xaa : { spit("ms"); break;}  // nghs 
-    case 0xca : { spit("nks"); break;}  // ngts 
-    case 0xb2 : { spit("nd"); break;}  // nchs 
-    case 0xe2 : { spit("nths"); break;}  // nhts 
-    case 0x3c : { spit("lf"); break;}  // lgch 
-    case 0x5c : { spit("ckl"); break;}  // lgct 
-    case 0x9c : { spit("bles"); break;}  // lgcs 
-    case 0x6c : { spit("xt"); break;}  // lght 
-    case 0xac : { spit("xes"); break;}  // lghs 
-    case 0x74 : { spit("pth"); break;}  // lcht 
-    case 0xb4 : { spit("phs"); break;}  // lchs 
-    case 0x78 : { spit("ft"); break;}  // gcht 
-    case 0xb8 : { spit("dg"); break;}  // gchs 
-    case 0xd8 : { spit("cks"); break;}  // gcts 
-    case 0xe8 : { spit("ghts"); break;}  // ghts 
-    case 0x0f : { spit("ds"); break;}  // chts
-    case 0x1f : { spit("lb"); break;}  // rnlgc
-    case 0x2f : { spit("lm"); break;}  // rnlgh
-    case 0x4f : { spit("lk"); break;}  // rnlgt
-    case 0x37 : { spit("lch"); break;}  // rnlch
-    case 0x57 : { spit("lp"); break;}  // rnlct
-    case 0x97 : { spit("ples"); break;}  // rnlcs
-    case 0xa7 : { spit("lves"); break;}  // rnlhs
-    case 0xc7 : { spit("rsts"); break;}  // rnlts
-    case 0xab : { spit("rms"); break;}  // rnghs
-    case 0xb3 : { spit("wd"); break;}  // rnchs
-    case 0xe3 : { spit("wths"); break;}  // rnhts
-    case 0xad : { spit("rld"); break;}  // rlghs
-    case 0xe9 : { spit("wks"); break;}  // rghts
-    case 0xf1 : { spit("rds"); break;}  // rchts
-    case 0x3e : { spit("mp"); break;}  // nlgch
-    case 0x9e : { spit("lds"); break;}  // nlgcs
-    case 0x6e : { spit("dth"); break;}  // nlght
-    case 0xae : { spit("sms"); break;}  // nlghs
-    case 0xce : { spit("sks"); break;}  // nlgts
-    case 0xba : { spit("mbs"); break;}  // ngchs
-    case 0xda : { spit("bts"); break;}  // ngcts
-    case 0xea : { spit("ngths"); break;}  // nghts
-    case 0xf2 : { spit("nds"); break;}  // nchts
-    case 0xdc : { spit("ckles"); break;}  // lgcts
-    case 0xf4 : { spit("pths"); break;}  // lchts
-    case 0x9f : { spit("lbs"); break;}  // rnlgcs
-    case 0xaf : { spit("lms"); break;}  // rnlghs
-    case 0xcf : { spit("lks"); break;}  // rnlgts
-    case 0xb7 : { spit("ld"); break;}  // rnlchs
-    case 0xd7 : { spit("lps"); break;}  // rnlcts
-    case 0xf3 : { spit("wds"); break;}  // rnchts
-    case 0xf5 : { spit("rlds"); break;}  // rlchts
-    case 0x7e : { spit("mpt"); break;}  // nlgcht
-    case 0xbe : { spit("mps"); break;}  // nlgchs
-    case 0xee : { spit("dths"); break;}  // nlghts
-    case 0xf7 : { spit("lds"); break;}  // rnlchts
-    case 0xfe : { spit("mpts"); break;}  // nlgchts
   }
 }
 */
@@ -658,6 +460,61 @@ void scan(){
     if (movement()) {digitalWrite(13, LOW); leaving = true; return;}
   } while(pressed);
   digitalWrite(13, LOW);
+}
+
+// thumb strings with number key
+const char cn0[] PROGMEM = "";
+const char cn1[] PROGMEM = "ia"; // A
+const char cn2[] PROGMEM = "oo"; // O
+const char cn3[] PROGMEM = "ao"; // AO
+const char cn4[] PROGMEM = "ee"; // E
+const char cn5[] PROGMEM = "ae"; // AE
+const char cn6[] PROGMEM = "eo"; // OE
+const char cn7[] PROGMEM = "ei"; // AOE
+const char cn8[] PROGMEM = "ua"; // U
+const char cn9[] PROGMEM = "";
+const char cn10[] PROGMEM = "uo"; // OU
+const char cn11[] PROGMEM = "";
+const char cn12[] PROGMEM = "eu"; // EU
+const char cn13[] PROGMEM = "";
+const char cn14[] PROGMEM = "io"; // OEU
+const char cn15[] PROGMEM = "";
+
+const char* const center_number_side[] PROGMEM = {
+  cn0, cn1, cn2, cn3, cn4, cn5, cn6, cn7, cn8, cn9,
+  cn10, cn11, cn12, cn13, cn14, cn15,
+};
+
+const char c0[] PROGMEM = "";
+const char c1[] PROGMEM = "a"; // A
+const char c2[] PROGMEM = "o"; // O
+const char c3[] PROGMEM = "oa"; // AO
+const char c4[] PROGMEM = "e"; // E
+const char c5[] PROGMEM = "ea"; // AE
+const char c6[] PROGMEM = "oe"; // OE
+const char c7[] PROGMEM = "ie"; // AOE
+const char c8[] PROGMEM = "u"; // U
+const char c9[] PROGMEM = "au"; // AU
+const char c10[] PROGMEM = "ou"; // OU
+const char c11[] PROGMEM = "ui";
+const char c12[] PROGMEM = "i"; // EU
+const char c13[] PROGMEM = "ai";
+const char c14[] PROGMEM = "oi"; // OEU
+const char c15[] PROGMEM = "iu";
+
+const char* const center_side[] PROGMEM = {
+  c0, c1, c2, c3, c4, c5, c6, c7, c8, c9,
+  c10, c11, c12, c13, c14, c15,
+};
+
+void sendCenter() {
+  char buffer[4];
+  if(number) {
+    strcpy_P(buffer, (char*)pgm_read_word(&(center_number_side[center])));
+    spit(buffer); return;
+  }
+  strcpy_P(buffer, (char*)pgm_read_word(&(center_side[center])));
+  spit(buffer); return;
 }
 
 // right hand strings
@@ -947,10 +804,39 @@ const char* const right_side[] PROGMEM = {
   r250, r251, r252, r253, r254, r255
 };
 
-void emit(int ind) {
+void sendRight() {
   char buffer[10];
-  strcpy_P(buffer, (char*)pgm_read_word(&(right_side[ind])));
-  Keyboard.print(buffer);
+  if(right == 0x0c) {
+    if(data[3] & 0x08) {
+      strcpy(buffer, "logy");
+      spit(buffer);
+      skipping = true; return;
+    }
+  }
+  if(right == 0x50) {
+    if (data[3] & 0x04) {
+      strcpy(buffer, "cate");
+      spit(buffer);
+      skipping = true; return;
+    }
+  }
+  if(right == 0xc0){
+    if (data[3] & 0x08) {
+      strcpy(buffer, "ys");
+      spit(buffer);
+      skipping = true; return;
+    }
+  }
+  if(right == 0xc8) {
+    if (data[3] & 0x04) {
+      strcpy(buffer, "kes");
+      spit(buffer);
+      skipping = true; return;
+    }
+  }
+  skipping = false;
+  strcpy_P(buffer, (char*)pgm_read_word(&(right_side[right])));
+  spit(buffer);
 }
 
 void run() {
@@ -966,9 +852,7 @@ void run() {
   maybeSpace();
   sendLeft();
   sendCenter();
-//  sendRight();
-//  spit(right_side[right]);
-  emit(right);
+  sendRight();
   if (!skipping) {
     if (data[3] & 0x04) spit("e");
     if (data[3] & 0x08) spit("y");
