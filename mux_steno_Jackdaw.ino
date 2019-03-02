@@ -28,7 +28,6 @@ boolean number = false;
 boolean caps = false;
 boolean vowels = false;
 boolean leaving = false;
-// boolean skipping = false;
 boolean spacing = false;
 
 void setup() {
@@ -89,7 +88,7 @@ void maybeSpace() {
   if (!star & spacing) Keyboard.write(' ');
 }
 
-void layer() { // number key is pressed if we got here
+void numbers() { // number key is pressed if we got here
   if (data[3] & 0x04) {
     if (left & 0x02) {spit("11"); return;}
     if (left & 0x04) {spit("22"); return;}
@@ -290,14 +289,12 @@ void moving(byte a) {
 boolean movement() {
   if((data[0] == 0x15) & (data[1] == 0x01) & (data[3] == 0)) {
     delay(20); // debounce the key
-//    if((data[0] == 0x15) & (data[1] == 0x01) & (data[3] == 0)) {
       if(data[2] == 0x29) {moving(KEY_BACKSPACE); spacing = false; return 1;}
       if(data[2] == 0x02) {moving(KEY_LEFT_ARROW); return 1;}
       if(data[2] == 0x04) {moving(KEY_UP_ARROW); return 1;}
       if(data[2] == 0x08) {moving(KEY_DOWN_ARROW); return 1;}
       if(data[2] == 0x20) {moving(KEY_RIGHT_ARROW); return 1;}
     }
-//  }
   return 0;
 }
 
@@ -695,7 +692,7 @@ const char r26[] PROGMEM = "gg";
 const char r27[] PROGMEM = "";
 const char r28[] PROGMEM = "bl";
 const char r29[] PROGMEM = "";
-const char r30[] PROGMEM = "";
+const char r30[] PROGMEM = "ld";
 const char r31[] PROGMEM = "lb";
 const char r32[] PROGMEM = "h";
 const char r33[] PROGMEM = "w";
@@ -957,7 +954,6 @@ void sendRight() {
     if(data[3] & 0x08) {
       strcpy(buffer, "logy");
       spit(buffer);
-//      skipping = true;
       return;
     }
   }
@@ -965,7 +961,6 @@ void sendRight() {
     if (data[3] & 0x04) {
       strcpy(buffer, "cate");
       spit(buffer);
-//      skipping = true;
       return;
     }
   }
@@ -973,7 +968,6 @@ void sendRight() {
     if (data[3] & 0x08) {
       strcpy(buffer, "ys");
       spit(buffer);
-//      skipping = true;
       return;
     }
   }
@@ -981,35 +975,48 @@ void sendRight() {
     if (data[3] & 0x04) {
       strcpy(buffer, "kes");
       spit(buffer);
-//      skipping = true;
       return;
     }
   }
-//  skipping = false;
   strcpy_P(buffer, (char*)pgm_read_word(&(right_side[right])));
   spit(buffer);
   if (data[3] & 0x04) spit("e");
   if (data[3] & 0x08) spit("y");
 }
 
+boolean briefs() {
+  if(star & !right & !left & !center & !(data[3] & 0x0c)) {
+    Keyboard.write(KEY_BACKSPACE); spacing = false; return true;
+  }
+  if (center == 0) {
+    if (right == 0x16) {
+    // add movement to these (key repeat)
+      if (left == 0x00) {
+        Keyboard.write(' '); spacing = false;
+        return true;
+      }
+      if (left == 0x3c) {
+        Keyboard.write(KEY_BACKSPACE); spacing = false;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void run() {
   scan(); if(leaving) return;
   organize();
-  if(star & !right & !left & !center & !(data[3] & 0x0c)) {
-    Keyboard.write(KEY_BACKSPACE); spacing = false; return;
-  }
+  if (briefs()) return;
+
   if ((number) & (!star) & (!center)) {
-    layer(); return;
+    numbers(); return;
   }
   if (preprocess()) return;
   maybeSpace();
   sendLeft();
   sendCenter();
   sendRight();
-//  if (!skipping) {
-//    if (data[3] & 0x04) spit("e");
-//    if (data[3] & 0x08) spit("y");
-//  }
   spacing = true;
 }
 
