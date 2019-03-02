@@ -28,7 +28,7 @@ boolean number = false;
 boolean caps = false;
 boolean vowels = false;
 boolean leaving = false;
-boolean skipping = false;
+// boolean skipping = false;
 boolean spacing = false;
 
 void setup() {
@@ -579,7 +579,7 @@ const char* const left_side[] PROGMEM = {
   l10, l11, l12, l13, l14, l15, l16, l17, l18, l19,
   l20, l21, l22, l23, l24, l25, l26, l27, l28, l29,
   l30, l31, l32, l33, l34, l35, l36, l37, l38, l39,
-  l40, l41, l42, l43, l44, l45, l46, l47, l44, l49,
+  l40, l41, l42, l43, l44, l45, l46, l47, l48, l49,
   l50, l51, l52, l53, l54, l55, l56, l57, l58, l59,
   l60, l61, l62, l63, l64, l65, l66, l67, l68, l69,
   l70, l71, l72, l73, l74, l75, l76, l77, l78, l79,
@@ -671,7 +671,7 @@ const char r2[] PROGMEM = "n";
 const char r3[] PROGMEM = "rn";
 const char r4[] PROGMEM = "l";
 const char r5[] PROGMEM = "rl";
-const char r6[] PROGMEM = "nl";
+const char r6[] PROGMEM = "s";
 const char r7[] PROGMEM = "ll";
 const char r8[] PROGMEM = "g";
 const char r9[] PROGMEM = "rg";
@@ -957,7 +957,7 @@ void sendRight() {
     if(data[3] & 0x08) {
       strcpy(buffer, "logy");
       spit(buffer);
-      skipping = true;
+//      skipping = true;
       return;
     }
   }
@@ -965,7 +965,7 @@ void sendRight() {
     if (data[3] & 0x04) {
       strcpy(buffer, "cate");
       spit(buffer);
-      skipping = true;
+//      skipping = true;
       return;
     }
   }
@@ -973,7 +973,7 @@ void sendRight() {
     if (data[3] & 0x08) {
       strcpy(buffer, "ys");
       spit(buffer);
-      skipping = true;
+//      skipping = true;
       return;
     }
   }
@@ -981,13 +981,15 @@ void sendRight() {
     if (data[3] & 0x04) {
       strcpy(buffer, "kes");
       spit(buffer);
-      skipping = true;
+//      skipping = true;
       return;
     }
   }
-  skipping = false;
+//  skipping = false;
   strcpy_P(buffer, (char*)pgm_read_word(&(right_side[right])));
   spit(buffer);
+  if (data[3] & 0x04) spit("e");
+  if (data[3] & 0x08) spit("y");
 }
 
 void run() {
@@ -1004,10 +1006,10 @@ void run() {
   sendLeft();
   sendCenter();
   sendRight();
-  if (!skipping) {
-    if (data[3] & 0x04) spit("e");
-    if (data[3] & 0x08) spit("y");
-  }
+//  if (!skipping) {
+//    if (data[3] & 0x04) spit("e");
+//    if (data[3] & 0x08) spit("y");
+//  }
   spacing = true;
 }
 
