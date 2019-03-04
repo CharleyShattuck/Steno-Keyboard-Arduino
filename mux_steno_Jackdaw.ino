@@ -127,134 +127,152 @@ void numbers() { // number key is pressed if we got here
   return;
 }
 
-int preprocess() {
-  if((center == 0x0c) & (left == 0xaa)) {
-    maybeSpace(); spit("I"); spacing = true; caps = false; return 1;
+boolean commands() { // before "maybeSpace()"
+  if(star & !right & !left & !center & !(data[3] & 0x0c)) {
+    Keyboard.write(KEY_BACKSPACE); spacing = false; return true;
   }
-  if(center == 0) {
+  if (center == 0) {
     if(left == 0x14) {
-      if(right == 0x14) {Keyboard.write('.'); caps = true; return 1;}
-      if(right == 0x28) {Keyboard.write('!'); caps = true; return 1;}
+      if(right == 0x14) {Keyboard.write('.'); caps = true; return true;}
+      if(right == 0x28) {Keyboard.write('!'); caps = true; return true;}
     }
     if(left == 0x28) {
-      if(right == 0x28) {Keyboard.write(','); return 1;}
-      if(right == 0x14) {Keyboard.write('?'); caps = true; return 1;}
+      if(right == 0x28) {Keyboard.write(','); return true;}
+      if(right == 0x14) {Keyboard.write('?'); caps = true; return true;}
     }
     if(left == 0xf0) { // contractions
-      if(right == 0x00) {spit("'"); return 1;}
-      if(right == 0x0e) {spit("'d"); return 1;}
-      if(right == 0xb0) {spit("'d"); return 1;}
-      if(right == 0x40) {spit("'t"); return 1;}
-      if(right == 0x80) {spit("'s"); return 1;}
-      if(right == 0x06) {spit("'s"); return 1;}
-      if(right == 0x2a) {spit("'m"); return 1;}
-      if(right == 0x42) {spit("n't"); return 1;}
-      if(right == 0x01) {spit("'re"); return 1;}
-      if(right == 0x04) {spit("'ll"); return 1;}
-      if(right == 0x22) {spit("'ve"); return 1;}
+      if(right == 0x00) {spit("'"); return true;}
+      if(right == 0x0e) {spit("'d"); return true;}
+      if(right == 0xb0) {spit("'d"); return true;}
+      if(right == 0x40) {spit("'t"); return true;}
+      if(right == 0x80) {spit("'s"); return true;}
+      if(right == 0x06) {spit("'s"); return true;}
+      if(right == 0x2a) {spit("'m"); return true;}
+      if(right == 0x42) {spit("n't"); return true;}
+      if(right == 0x01) {spit("'re"); return true;}
+      if(right == 0x04) {spit("'ll"); return true;}
+      if(right == 0x22) {spit("'ve"); return true;}
+    }
+    if (right == 0x16) {
+      if (left == 0x00) {
+        Keyboard.write(' '); spacing = false;
+        return true;
+      }
+      if (left == 0x3c) {
+        Keyboard.write(KEY_BACKSPACE); spacing = false;
+        return true;
+      }
     }
     if((left == 0xa0) & (right == 0x0a)) {
       Keyboard.write(KEY_RETURN);
-      spacing = false; return 1;
+      spacing = false; return true;
     }
     if((left == 0x80) & (right == 0x02)) {
       Keyboard.write(KEY_RETURN);
-      caps = true; spacing = false; return 1;
+      caps = true; spacing = false; return true;
     }
     if(left == 0xaa) {
-      if(right == 0x16) {spit(" "); spacing = false; return 1;}
-      if(right == 0xa8) {caps = true; spacing = false; return 1;}
-      if(right == 0xaa) {caps = true; spacing = true; return 1;}
-      if(right == 0x28) {caps = false; return 1;}
-      if(right == 0x55) {Keyboard.write(KEY_ESC); return 1;}
-      if(right == 0x15) {Keyboard.write(KEY_HOME); return 1;}
-      if(right == 0x2a) {Keyboard.write(KEY_END); return 1;}
-      if(right == 0x26) {Keyboard.write(KEY_PAGE_UP); return 1;}
-      if(right == 0x19) {Keyboard.write(KEY_PAGE_DOWN); return 1;}
+      if(right == 0xa8) {caps = true; spacing = false; return true;}
+      if(right == 0xaa) {caps = true; spacing = true; return true;}
+      if(right == 0x28) {caps = false; return true;}
+      if(right == 0x55) {Keyboard.write(KEY_ESC); return true;}
+      if(right == 0x15) {Keyboard.write(KEY_HOME); return true;}
+      if(right == 0x2a) {Keyboard.write(KEY_END); return true;}
+      if(right == 0x26) {Keyboard.write(KEY_PAGE_UP); return true;}
+      if(right == 0x19) {Keyboard.write(KEY_PAGE_DOWN); return true;}
       if(right == 0x0a) {
         Keyboard.press(KEY_LEFT_CTRL);
         Keyboard.write(KEY_LEFT_ARROW);
         Keyboard.release(KEY_LEFT_CTRL);
-        return 1;
+        return true;
       }
       if(right == 0x28) {
         Keyboard.press(KEY_LEFT_CTRL);
         Keyboard.write(KEY_RIGHT_ARROW);
         Keyboard.release(KEY_LEFT_CTRL);
-        return 1;
+        return true;
       }
-      if(right == 0x3f) {Keyboard.write(KEY_CAPS_LOCK); return 1;}
-    }
-    if(right == 0x13) { // rnc open
-      if(left == 0x94) {maybeSpace(); spit("("); spacing = false; return 1;}
-      if(left == 0xbc) {maybeSpace(); spit("["); spacing = false; return 1;}
-      if(left == 0xac) {maybeSpace(); spit("{"); spacing = false; return 1;}
-      if(left == 0x40) {maybeSpace(); spit("<"); spacing = false; return 1;}
-      if(left == 0xc8) {maybeSpace(); spit("\""); spacing = false; return 1;}
-      if(left == 0x08) {maybeSpace(); spit("'"); spacing = false; return 1;}
-      if(left == 0x02) {maybeSpace(); spit("*"); spacing = false; return 1;}
-    }
-    if(right == 0x8c) { // lgs close
-      if(left == 0x94) {spit(")"); return 1;} // pr paren
-      if(left == 0xbc) {spit("]"); return 1;} // br bracket
-      if(left == 0xac) {spit("}"); return 1;} // fr French
-      if(left == 0x40) {spit(">"); return 1;} // n angle
-      if(left == 0xc8) {spit("\""); return 1;} // q quote
-      if(left == 0x08) {spit("'"); return 1;} // t tick
-      if(left == 0x02) {spit("*"); return 1;} // star
-    }
-    if (right == 0x55) {  // rlct
-      if (left == 0x08) {spit("~"); return 1;} // Tilde
-      if (left == 0x60) {spit("@"); return 1;} // Yat
-      if (left == 0x20) {spit("#"); return 1;} // Hash
-      if (left == 0x0c) {spit("$"); return 1;} // Dollar
-      if (left == 0x14) {spit("%"); return 1;} // Percent
-      if (left == 0x84) {spit("^"); return 1;} // CaRat
-      if (left == 0x50) {spit("&"); return 1;} // aMpesand
-      if (left == 0x02) {spit("*"); return 1;} // Star
-      if (left == 0xd4) {spit("+"); return 1;} // PLus
-      if (left == 0xc8) {spit("="); return 1;} // eQual
-      if (left == 0xc2) {spit("/"); return 1;} // SLash
-      if (left == 0x3c) {spit("\\"); return 1;} // Backslash
-      if (left == 0xc4) {spit(":"); return 1;} // CoLon
-      if (left == 0x06) {spit(";"); return 1;} // SemiColon
-      if (left == 0x0e) {spit("`"); return 1;} // Grave
-      if (left == 0xcc) {Keyboard.write(KEY_DELETE); return 1;} // DeLete
-      if (left == 0x40) {Keyboard.write(KEY_INSERT); return 1;} // iNseRt
-      if (left == 0x8c) {spit("_"); return 1;} // unDeRscore
-      if (left == 0x2c) {spit("-"); return 1;} // DasH
+      if(right == 0x3f) {Keyboard.write(KEY_CAPS_LOCK); return true;}
     }
     if(right == 0xc3) { // left modifiers
-      if(left == 0x04) {Keyboard.press(KEY_LEFT_CTRL); return 1;}
-      if(left == 0x02) {Keyboard.press(KEY_LEFT_SHIFT); return 1;}
-      if(left == 0xc0) {Keyboard.press(KEY_LEFT_ALT); return 1;}
-      if(left == 0x0e) {Keyboard.press(KEY_LEFT_GUI); return 1;}
-      Keyboard.releaseAll(); return 1;
+      if(left == 0x04) {Keyboard.press(KEY_LEFT_CTRL); return true;}
+      if(left == 0x02) {Keyboard.press(KEY_LEFT_SHIFT); return true;}
+      if(left == 0xc0) {Keyboard.press(KEY_LEFT_ALT); return true;}
+      if(left == 0x0e) {Keyboard.press(KEY_LEFT_GUI); return true;}
+      Keyboard.releaseAll(); return true;
     }
     if(right == 0xcc) { // right modifiers
-      if(left == 0x04) {Keyboard.press(KEY_RIGHT_CTRL); return 1;}
-      if(left == 0x02) {Keyboard.press(KEY_RIGHT_SHIFT); return 1;}
-      if(left == 0xc0) {Keyboard.press(KEY_RIGHT_ALT); return 1;}
-      if(left == 0x0e) {Keyboard.press(KEY_RIGHT_GUI); return 1;}
-      Keyboard.releaseAll(); return 1;
+      if(left == 0x04) {Keyboard.press(KEY_RIGHT_CTRL); return true;}
+      if(left == 0x02) {Keyboard.press(KEY_RIGHT_SHIFT); return true;}
+      if(left == 0xc0) {Keyboard.press(KEY_RIGHT_ALT); return true;}
+      if(left == 0x0e) {Keyboard.press(KEY_RIGHT_GUI); return true;}
+      Keyboard.releaseAll(); return true;
     }
     if(left == 0x98) { // function keys
-      if(right == 0x26) {Keyboard.write(KEY_TAB); return 1;}
-      if(right == 0x01) {Keyboard.write(KEY_F1); return 1;}
-      if(right == 0x04) {Keyboard.write(KEY_F2); return 1;}
-      if(right == 0x10) {Keyboard.write(KEY_F3); return 1;}
-      if(right == 0x40) {Keyboard.write(KEY_F4); return 1;}
-      if(right == 0x02) {Keyboard.write(KEY_F5); return 1;}
-      if(right == 0x08) {Keyboard.write(KEY_F6); return 1;}
-      if(right == 0x20) {Keyboard.write(KEY_F7); return 1;}
-      if(right == 0x80) {Keyboard.write(KEY_F8); return 1;}
-      if(right == 0x03) {Keyboard.write(KEY_F9); return 1;}
-      if(right == 0x0c) {Keyboard.write(KEY_F10); return 1;}
-      if(right == 0x30) {Keyboard.write(KEY_F11); return 1;}
-      if(right == 0xc0) {Keyboard.write(KEY_F12); return 1;}
+      if(right == 0x26) {Keyboard.write(KEY_TAB); return true;}
+      if(right == 0x01) {Keyboard.write(KEY_F1); return true;}
+      if(right == 0x04) {Keyboard.write(KEY_F2); return true;}
+      if(right == 0x10) {Keyboard.write(KEY_F3); return true;}
+      if(right == 0x40) {Keyboard.write(KEY_F4); return true;}
+      if(right == 0x02) {Keyboard.write(KEY_F5); return true;}
+      if(right == 0x08) {Keyboard.write(KEY_F6); return true;}
+      if(right == 0x20) {Keyboard.write(KEY_F7); return true;}
+      if(right == 0x80) {Keyboard.write(KEY_F8); return true;}
+      if(right == 0x03) {Keyboard.write(KEY_F9); return true;}
+      if(right == 0x0c) {Keyboard.write(KEY_F10); return true;}
+      if(right == 0x30) {Keyboard.write(KEY_F11); return true;}
+      if(right == 0xc0) {Keyboard.write(KEY_F12); return true;}
+    }
+    if(right == 0x56) { // nlct open
+      if(left == 0x14) {maybeSpace(); spit("("); spacing = false; return true;}
+      if(left == 0x3c) {maybeSpace(); spit("["); spacing = false; return true;}
+      if(left == 0x2c) {maybeSpace(); spit("{"); spacing = false; return true;}
+      if(left == 0x40) {maybeSpace(); spit("<"); spacing = false; return true;}
+      if(left == 0xc2) {maybeSpace(); spit("\""); spacing = false; return true;}
+      if(left == 0x08) {maybeSpace(); spit("'"); spacing = false; return true;}
+      if(left == 0x02) {maybeSpace(); spit("*"); spacing = false; return true;}
+    }
+    if(right == 0xa9) { // rghs close
+      if(left == 0x14) {spit(")"); return true;} // p paren
+      if(left == 0x3c) {spit("]"); return true;} // b bracket
+      if(left == 0x2c) {spit("}"); return true;} // f French
+      if(left == 0x40) {spit(">"); return true;} // n angle
+      if(left == 0xc2) {spit("\""); return true;} // sl backslash
+      if(left == 0x08) {spit("'"); return true;} // t tick
+      if(left == 0x02) {spit("*"); return true;} // star
     }
   }
-  return 0;
+  return false;
+}
+
+boolean briefs() { // after "maybeSpace()"
+  if((center == 0x0c) & (left == 0xaa)) {
+    spit("I"); spacing = true; caps = false; return true;
+  }
+  if(center == 0) {
+    if (right == 0x55) {  // rlct
+      if (left == 0x08) {spit("~"); return true;} // Tilde
+      if (left == 0x60) {spit("@"); return true;} // Yat
+      if (left == 0x20) {spit("#"); return true;} // Hash
+      if (left == 0x0c) {spit("$"); return true;} // Dollar
+      if (left == 0x14) {spit("%"); return true;} // Percent
+      if (left == 0x84) {spit("^"); return true;} // CaRat
+      if (left == 0x50) {spit("&"); return true;} // aMpesand
+      if (left == 0x02) {spit("*"); return true;} // Star
+      if (left == 0xd4) {spit("+"); return true;} // PLus
+      if (left == 0xc8) {spit("="); return true;} // eQual
+      if (left == 0xc2) {spit("/"); return true;} // SLash
+      if (left == 0x3c) {spit("\\"); return true;} // Backslash
+      if (left == 0xc4) {spit(":"); return true;} // CoLon
+      if (left == 0x06) {spit(";"); return true;} // SemiColon
+      if (left == 0x0e) {spit("`"); return true;} // Grave
+      if (left == 0x8c) {spit("_"); return true;} // unDeRscore
+      if (left == 0x2c) {spit("-"); return true;} // DasH
+      if (left == 0x40) {Keyboard.write(KEY_INSERT); return true;} // iNseRt
+      if (left == 0xcc) {Keyboard.write(KEY_DELETE); return true;} // DeLete
+    }
+  }
+  return false;
 }
 
 // scan for keypresses
@@ -288,14 +306,14 @@ void moving(byte a) {
 
 boolean movement() {
   if((data[0] == 0x15) & (data[1] == 0x01) & (data[3] == 0)) {
-    delay(20); // debounce the key
-      if(data[2] == 0x29) {moving(KEY_BACKSPACE); spacing = false; return 1;}
-      if(data[2] == 0x02) {moving(KEY_LEFT_ARROW); return 1;}
-      if(data[2] == 0x04) {moving(KEY_UP_ARROW); return 1;}
-      if(data[2] == 0x08) {moving(KEY_DOWN_ARROW); return 1;}
-      if(data[2] == 0x20) {moving(KEY_RIGHT_ARROW); return 1;}
+    delay(20); // debounce the key?
+      if(data[2] == 0x29) {moving(KEY_BACKSPACE); spacing = false; return true;}
+      if(data[2] == 0x02) {moving(KEY_LEFT_ARROW); return true;}
+      if(data[2] == 0x04) {moving(KEY_UP_ARROW); return true;}
+      if(data[2] == 0x08) {moving(KEY_DOWN_ARROW); return true;}
+      if(data[2] == 0x20) {moving(KEY_RIGHT_ARROW); return true;}
     }
-  return 0;
+  return false;
 }
 
 // wait for keypress and scan until all released
@@ -820,7 +838,7 @@ const char r154[] PROGMEM = "ggs";
 const char r155[] PROGMEM = "";
 const char r156[] PROGMEM = "bles";
 const char r157[] PROGMEM = "";
-const char r158[] PROGMEM = "";
+const char r158[] PROGMEM = "lds";
 const char r159[] PROGMEM = "lbs";
 const char r160[] PROGMEM = "hs";
 const char r161[] PROGMEM = "ws";
@@ -853,7 +871,7 @@ const char r187[] PROGMEM = "";
 const char r188[] PROGMEM = "";
 const char r189[] PROGMEM = "";
 const char r190[] PROGMEM = "mps";
-const char r191[] PROGMEM = "";
+const char r191[] PROGMEM = "dd";
 const char r192[] PROGMEM = "ts";
 const char r193[] PROGMEM = "rts";
 const char r194[] PROGMEM = "nts";
@@ -984,36 +1002,13 @@ void sendRight() {
   if (data[3] & 0x08) spit("y");
 }
 
-boolean briefs() {
-  if(star & !right & !left & !center & !(data[3] & 0x0c)) {
-    Keyboard.write(KEY_BACKSPACE); spacing = false; return true;
-  }
-  if (center == 0) {
-    if (right == 0x16) {
-    // add movement to these (key repeat)
-      if (left == 0x00) {
-        Keyboard.write(' '); spacing = false;
-        return true;
-      }
-      if (left == 0x3c) {
-        Keyboard.write(KEY_BACKSPACE); spacing = false;
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 void run() {
   scan(); if(leaving) return;
   organize();
-  if (briefs()) return;
-
-  if ((number) & (!star) & (!center)) {
-    numbers(); return;
-  }
-  if (preprocess()) return;
+  if ((number) & (!star) & (!center)) {numbers(); return;}
+  if (commands()) return;
   maybeSpace();
+  if (briefs()) return;
   sendLeft();
   sendCenter();
   sendRight();
