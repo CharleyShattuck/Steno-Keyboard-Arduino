@@ -249,9 +249,6 @@ boolean commands() { // before "maybeSpace()"
 }
 
 boolean briefs() { // after "maybeSpace()"
-  if((center == 0x0c) & (left == 0xaa)) {
-    spit("I"); spacing = true; caps = false; return true;
-  }
   if(center == 0) {
     if (right == 0x55) {  // rlct
       if (left == 0x08) {spit("~"); return true;} // Tilde
@@ -274,6 +271,37 @@ boolean briefs() { // after "maybeSpace()"
       if (left == 0x40) {Keyboard.write(KEY_INSERT); return true;} // iNseRt
       if (left == 0xcc) {Keyboard.write(KEY_DELETE); return true;} // DeLete
     }
+    if (right == 0x04) {
+      if (left == 0x01) {spit("A"); return true;}
+      if (left == 0x3c) {spit("B"); return true;}
+      if (left == 0x04) {spit("C"); return true;}
+      if (left == 0x0c) {spit("D"); return true;}
+      if (left == 0x2c) {spit("F"); return true;}
+      if (left == 0x0e) {spit("G"); return true;}
+      if (left == 0x20) {spit("H"); return true;}
+      if (left == 0x58) {spit("J"); return true;}
+      if (left == 0x38) {spit("K"); return true;}
+      if (left == 0xc0) {spit("L"); return true;}
+      if (left == 0x50) {spit("M"); return true;}
+      if (left == 0x40) {spit("N"); return true;}
+      if (left == 0x14) {spit("P"); return true;}
+      if (left == 0xc8) {spit("Q"); return true;}
+      if (left == 0x80) {spit("R"); return true;}
+      if (left == 0x02) {spit("S"); return true;}
+      if (left == 0x08) {spit("T"); return true;}
+      if (left == 0x48) {spit("V"); return true;}
+      if (left == 0x10) {spit("W"); return true;}
+      if (left == 0x1a) {spit("X"); return true;}
+      if (left == 0x60) {spit("Y"); return true;}
+      if (left == 0x44) {spit("Z"); return true;}
+    }
+  }
+  if ((left == 0x00) & (right == 0x04)) {
+    if (center == 0x01) {spit("A"); return true;}
+    if (center == 0x02) {spit("O"); return true;}
+    if (center == 0x04) {spit("E"); return true;}
+    if (center == 0x08) {spit("U"); return true;}
+    if (center == 0x0c) {spit("I"); return true;}
   }
   return false;
 }
@@ -336,290 +364,326 @@ void scan(){
 }
 
 // left hand strings
-const char l0[] PROGMEM = "";
-const char l1[] PROGMEM = "a";
-const char l2[] PROGMEM = "s";
-const char l3[] PROGMEM = "as";
-const char l4[] PROGMEM = "c";
-const char l5[] PROGMEM = "";
-const char l6[] PROGMEM = "sc"; // sc
-const char l7[] PROGMEM = "";
-const char l8[] PROGMEM = "t";
-const char l9[] PROGMEM = "";
-const char l10[] PROGMEM = "st"; // st
-const char l11[] PROGMEM = "";
-const char l12[] PROGMEM = "d"; // ct
-const char l13[] PROGMEM = "";
-const char l14[] PROGMEM = "g"; // sct
-const char l15[] PROGMEM = "";
-const char l16[] PROGMEM = "w";
-const char l17[] PROGMEM = "";
-const char l18[] PROGMEM = "sw"; // sw
-const char l19[] PROGMEM = "";
-const char l20[] PROGMEM = "p"; // cw
-const char l21[] PROGMEM = "";
-const char l22[] PROGMEM = "sp"; // scw
-const char l23[] PROGMEM = "";
-const char l24[] PROGMEM = "tw"; // tw
-const char l25[] PROGMEM = "";
-const char l26[] PROGMEM = "x"; // stw
-const char l27[] PROGMEM = "";
-const char l28[] PROGMEM = "dw"; // ctw
-const char l29[] PROGMEM = "";
-const char l30[] PROGMEM = "gw"; // sctw
-const char l31[] PROGMEM = "";
-const char l32[] PROGMEM = "h";
-const char l33[] PROGMEM = "";
-const char l34[] PROGMEM = "sh"; // sh
-const char l35[] PROGMEM = "";
-const char l36[] PROGMEM = "ch"; // ch
-const char l37[] PROGMEM = "";
-const char l38[] PROGMEM = "sch"; // sch
-const char l39[] PROGMEM = "";
-const char l40[] PROGMEM = "th"; // th
-const char l41[] PROGMEM = "";
-const char l42[] PROGMEM = "";
-const char l43[] PROGMEM = "";
-const char l44[] PROGMEM = "f"; // cth
-const char l45[] PROGMEM = "";
-const char l46[] PROGMEM = "gh"; // scth
-const char l47[] PROGMEM = "";
-const char l48[] PROGMEM = "wh"; // wh
-const char l49[] PROGMEM = "";
-const char l50[] PROGMEM = "";
-const char l51[] PROGMEM = "";
-const char l52[] PROGMEM = "ph"; // cwh
-const char l53[] PROGMEM = "";
-const char l54[] PROGMEM = "sph"; // scwh
-const char l55[] PROGMEM = "";
-const char l56[] PROGMEM = "k"; // twh
-const char l57[] PROGMEM = "";
-const char l58[] PROGMEM = "sk"; // stwh
-const char l59[] PROGMEM = "";
-const char l60[] PROGMEM = "b"; // ctwh
-const char l61[] PROGMEM = "";
-const char l62[] PROGMEM = "";
-const char l63[] PROGMEM = "";
-const char l64[] PROGMEM = "n"; 
-const char l65[] PROGMEM = "";
-const char l66[] PROGMEM = "sn"; // sn
-const char l67[] PROGMEM = "";
-const char l68[] PROGMEM = "z"; // cn
-const char l69[] PROGMEM = "";
-const char l70[] PROGMEM = "ss"; // scn
-const char l71[] PROGMEM = "";
-const char l72[] PROGMEM = "v"; // tn
-const char l73[] PROGMEM = "";
-const char l74[] PROGMEM = "sv"; // stn
-const char l75[] PROGMEM = "";
-const char l76[] PROGMEM = "dev"; // ctn
-const char l77[] PROGMEM = "";
-const char l78[] PROGMEM = "gn"; // sctn
-const char l79[] PROGMEM = "";
-const char l80[] PROGMEM = "m"; // wn
-const char l81[] PROGMEM = "";
-const char l82[] PROGMEM = "sm"; // swn
-const char l83[] PROGMEM = "";
-const char l84[] PROGMEM = "pn"; // cwn
-const char l85[] PROGMEM = "";
-const char l86[] PROGMEM = "";
-const char l87[] PROGMEM = "";
-const char l88[] PROGMEM = "j"; // twn
-const char l89[] PROGMEM = "";
-const char l90[] PROGMEM = "";
-const char l91[] PROGMEM = "";
-const char l92[] PROGMEM = "dem"; // ctwn
-const char l93[] PROGMEM = "";
-const char l94[] PROGMEM = "";
-const char l95[] PROGMEM = "";
-const char l96[] PROGMEM = "y"; // hn
-const char l97[] PROGMEM = "";
-const char l98[] PROGMEM = "sy"; // shn
-const char l99[] PROGMEM = "";
-const char l100[] PROGMEM = "cy"; // chn
-const char l101[] PROGMEM = "";
-const char l102[] PROGMEM = "";
-const char l103[] PROGMEM = "";
-const char l104[] PROGMEM =  "ty"; // thn
-const char l105[] PROGMEM = "";
-const char l106[] PROGMEM = "sty"; // sthn
-const char l107[] PROGMEM = "";
-const char l108[] PROGMEM = "dy"; // cthn
-const char l109[] PROGMEM = "";
-const char l110[] PROGMEM = "gy"; // scthn
-const char l111[] PROGMEM = "";
-const char l112[] PROGMEM = "my"; // whn
-const char l113[] PROGMEM = "";
-const char l114[] PROGMEM = "";
-const char l115[] PROGMEM = "";
-const char l116[] PROGMEM = "py"; // cwhn
-const char l117[] PROGMEM = "";
-const char l118[] PROGMEM = "spy"; // scwhn
-const char l119[] PROGMEM = "";
-const char l120[] PROGMEM = "kn"; // twhn
-const char l121[] PROGMEM = "";
-const char l122[] PROGMEM = "xy"; // stwhn
-const char l123[] PROGMEM = "";
-const char l124[] PROGMEM = "by"; // ctwhn
-const char l125[] PROGMEM = "";
-const char l126[] PROGMEM = "";
-const char l127[] PROGMEM = "";
-const char l128[] PROGMEM = "r"; 
-const char l129[] PROGMEM = ""; 
-const char l130[] PROGMEM = "ser"; // sr
-const char l131[] PROGMEM = ""; 
-const char l132[] PROGMEM = "cr"; // cr
-const char l133[] PROGMEM = ""; 
-const char l134[] PROGMEM = "scr"; // scr
-const char l135[] PROGMEM = ""; 
-const char l136[] PROGMEM = "tr";  // tr 
-const char l137[] PROGMEM = ""; 
-const char l138[] PROGMEM = "str"; // str
-const char l139[] PROGMEM = ""; 
-const char l140[] PROGMEM = "dr"; // ctr
-const char l141[] PROGMEM = ""; 
-const char l142[] PROGMEM = "gr"; // sctr
-const char l143[] PROGMEM = ""; 
-const char l144[] PROGMEM = "wr"; // wr
-const char l145[] PROGMEM = ""; 
-const char l146[] PROGMEM = ""; 
-const char l147[] PROGMEM = ""; 
-const char l148[] PROGMEM = "pr"; // cwr
-const char l149[] PROGMEM = ""; 
-const char l150[] PROGMEM = "spr"; // scwr
-const char l151[] PROGMEM = ""; 
-const char l152[] PROGMEM = ""; 
-const char l153[] PROGMEM = ""; 
-const char l154[] PROGMEM = "xr"; // stwr
-const char l155[] PROGMEM = ""; 
-const char l156[] PROGMEM = "der"; // ctwr
-const char l157[] PROGMEM = ""; 
-const char l158[] PROGMEM = ""; 
-const char l159[] PROGMEM = ""; 
-const char l160[] PROGMEM = "rh"; // hr
-const char l161[] PROGMEM = ""; 
-const char l162[] PROGMEM = "shr"; // shr
-const char l163[] PROGMEM = ""; 
-const char l164[] PROGMEM = "chr"; // chr
-const char l165[] PROGMEM = ""; 
-const char l166[] PROGMEM = ""; 
-const char l167[] PROGMEM = ""; 
-const char l168[] PROGMEM = "thr"; // thr
-const char l169[] PROGMEM = ""; 
-const char l170[] PROGMEM = ""; 
-const char l171[] PROGMEM = ""; 
-const char l172[] PROGMEM = "fr"; // cthr
-const char l173[] PROGMEM = ""; 
-const char l174[] PROGMEM = ""; 
-const char l175[] PROGMEM = ""; 
-const char l176[] PROGMEM = ""; 
-const char l177[] PROGMEM = ""; 
-const char l178[] PROGMEM = ""; 
-const char l179[] PROGMEM = ""; 
-const char l180[] PROGMEM = "phr"; // cwhr
-const char l181[] PROGMEM = ""; 
-const char l182[] PROGMEM = ""; 
-const char l183[] PROGMEM = ""; 
-const char l184[] PROGMEM = "kr"; // twhr
-const char l185[] PROGMEM = ""; 
-const char l186[] PROGMEM = ""; 
-const char l187[] PROGMEM = ""; 
-const char l188[] PROGMEM = "br"; // ctwhr
-const char l189[] PROGMEM = ""; 
-const char l190[] PROGMEM = ""; 
-const char l191[] PROGMEM = ""; 
-const char l192[] PROGMEM = "l"; // nr
-const char l193[] PROGMEM = ""; 
-const char l194[] PROGMEM = "sl"; // snr
-const char l195[] PROGMEM = ""; 
-const char l196[] PROGMEM = "cl"; // cnr
-const char l197[] PROGMEM = ""; 
-const char l198[] PROGMEM = ""; 
-const char l199[] PROGMEM = ""; 
-const char l200[] PROGMEM = "q"; // tnr
-const char l201[] PROGMEM = ""; 
-const char l202[] PROGMEM = "sq"; // stnr
-const char l203[] PROGMEM = ""; 
-const char l204[] PROGMEM = "del"; // ctnr
-const char l205[] PROGMEM = ""; 
-const char l206[] PROGMEM = "gl"; // sctnr
-const char l207[] PROGMEM = ""; 
-const char l208[] PROGMEM = "mr"; // wnr
-const char l209[] PROGMEM = ""; 
-const char l210[] PROGMEM = ""; 
-const char l211[] PROGMEM = ""; 
-const char l212[] PROGMEM = "pl"; // cwnr
-const char l213[] PROGMEM = ""; 
-const char l214[] PROGMEM = "spl"; // scwnr
-const char l215[] PROGMEM = ""; 
-const char l216[] PROGMEM = "jer"; // twnr
-const char l217[] PROGMEM = ""; 
-const char l218[] PROGMEM = "serv"; // stwnr
-const char l219[] PROGMEM = ""; 
-const char l220[] PROGMEM = ""; 
-const char l221[] PROGMEM = ""; 
-const char l222[] PROGMEM = ""; 
-const char l223[] PROGMEM = ""; 
-const char l224[] PROGMEM = "ly"; // hnr
-const char l225[] PROGMEM = ""; 
-const char l226[] PROGMEM = "sly"; // shnr
-const char l227[] PROGMEM = ""; 
-const char l228[] PROGMEM = "cry"; // chnr
-const char l229[] PROGMEM = ""; 
-const char l230[] PROGMEM = ""; 
-const char l231[] PROGMEM = ""; 
-const char l232[] PROGMEM = "try"; // thnr
-const char l233[] PROGMEM = ""; 
-const char l234[] PROGMEM = "stry"; // sthnr
-const char l235[] PROGMEM = ""; 
-const char l236[] PROGMEM = "fl"; // cthnr
-const char l237[] PROGMEM = ""; 
-const char l238[] PROGMEM = ""; 
-const char l239[] PROGMEM = ""; 
-const char l240[] PROGMEM = ""; 
-const char l241[] PROGMEM = ""; 
-const char l242[] PROGMEM = ""; 
-const char l243[] PROGMEM = "phl"; // cwhnr
-const char l244[] PROGMEM = ""; 
-const char l245[] PROGMEM = ""; 
-const char l246[] PROGMEM = ""; 
-const char l247[] PROGMEM = "kl"; // twhnr
-const char l248[] PROGMEM = ""; 
-const char l249[] PROGMEM = ""; 
-const char l250[] PROGMEM = ""; 
-const char l251[] PROGMEM = "bl"; // ctwhnr
-const char l252[] PROGMEM = ""; 
-const char l253[] PROGMEM = ""; 
-const char l254[] PROGMEM = ""; 
-const char l255[] PROGMEM = ""; 
+const char l00[] PROGMEM = "";
+const char l01[] PROGMEM = "a";
+const char l02[] PROGMEM = "s";
+const char l03[] PROGMEM = "as";
+const char l04[] PROGMEM = "c";
+const char l05[] PROGMEM = "ac";
+const char l06[] PROGMEM = "sc"; // sc
+const char l07[] PROGMEM = "asc";
+const char l08[] PROGMEM = "t";
+const char l09[] PROGMEM = "at";
+const char l0a[] PROGMEM = "st"; // st
+const char l0b[] PROGMEM = "ad";
+const char l0c[] PROGMEM = "d"; // ct
+const char l0d[] PROGMEM = "ast";
+const char l0e[] PROGMEM = "g"; // sct
+const char l0f[] PROGMEM = "ag";
+
+const char l10[] PROGMEM = "w"; // w
+const char l11[] PROGMEM = "aw"; // aw
+const char l12[] PROGMEM = "sw"; // sw
+const char l13[] PROGMEM = ""; // asw
+const char l14[] PROGMEM = "p"; // cw
+const char l15[] PROGMEM = "ap"; // acw
+const char l16[] PROGMEM = "sp"; // scw
+const char l17[] PROGMEM = "ass"; // ascn
+const char l18[] PROGMEM = "tw"; // tw
+const char l19[] PROGMEM = "att"; // atw
+const char l1a[] PROGMEM = "x"; // stw
+const char l1b[] PROGMEM = "ax"; // astw
+const char l1c[] PROGMEM = "dw"; // ctw
+const char l1d[] PROGMEM = "add"; // actw
+const char l1e[] PROGMEM = "gw"; // sctw
+const char l1f[] PROGMEM = "agg"; // asctw
+
+const char l20[] PROGMEM = "h";
+const char l21[] PROGMEM = "ah"; // ah
+const char l22[] PROGMEM = "sh"; // sh
+const char l23[] PROGMEM = "ash"; // ash
+const char l24[] PROGMEM = "ch"; // ch
+const char l25[] PROGMEM = "ach"; // ach
+const char l26[] PROGMEM = "sch"; // sch
+const char l27[] PROGMEM = ""; //asch
+const char l28[] PROGMEM = "th"; // th
+const char l29[] PROGMEM = "ath"; // ath
+const char l2a[] PROGMEM = ""; // sth
+const char l2b[] PROGMEM = "asth"; // asth
+const char l2c[] PROGMEM = "f"; // cth
+const char l2d[] PROGMEM = "af"; // acth
+const char l2e[] PROGMEM = "gh"; // scth
+const char l2f[] PROGMEM = "agh"; // ascth
+
+const char l30[] PROGMEM = "wh"; // wh
+const char l31[] PROGMEM = "awh"; // awh
+const char l32[] PROGMEM = ""; // swh
+const char l33[] PROGMEM = ""; // aswh
+const char l34[] PROGMEM = "ph"; // cwh
+const char l35[] PROGMEM = "aph"; // acwh
+const char l36[] PROGMEM = "sph"; // scwh
+const char l37[] PROGMEM = "asph"; // ascwh
+const char l38[] PROGMEM = "k"; // twh
+const char l39[] PROGMEM = "ak"; // atwh
+const char l3a[] PROGMEM = "sk"; // stwh
+const char l3b[] PROGMEM = "ask"; // astwh
+const char l3c[] PROGMEM = "b"; // ctwh
+const char l3d[] PROGMEM = "ab"; // actwh
+const char l3e[] PROGMEM = ""; // sctwh
+const char l3f[] PROGMEM = "abb"; // asctwh
+
+const char l40[] PROGMEM = "n"; 
+const char l41[] PROGMEM = "an"; // an
+const char l42[] PROGMEM = "sn"; // sn
+const char l43[] PROGMEM = "ann"; // asn
+const char l44[] PROGMEM = "z"; // cn
+const char l45[] PROGMEM = "az"; // acn
+const char l46[] PROGMEM = "ss"; // scn
+const char l47[] PROGMEM = "ass"; // ascn
+const char l48[] PROGMEM = "v"; // tn
+const char l49[] PROGMEM = "av"; // atn
+const char l4a[] PROGMEM = "sv"; // stn
+const char l4b[] PROGMEM = ""; // astn
+const char l4c[] PROGMEM = "dev"; // ctn
+const char l4d[] PROGMEM = "adv"; // actn
+const char l4e[] PROGMEM = "gn"; // sctn
+const char l4f[] PROGMEM = "agn"; // asctn
+
+const char l50[] PROGMEM = "m"; // wn
+const char l51[] PROGMEM = "am"; // awn
+const char l52[] PROGMEM = "sm"; // swn
+const char l53[] PROGMEM = "asm"; // aswn
+const char l54[] PROGMEM = "pn"; // cwn
+const char l55[] PROGMEM = "amm"; // acwn
+const char l56[] PROGMEM = ""; // scwn
+const char l57[] PROGMEM = "app"; // ascwn
+const char l58[] PROGMEM = "j"; // twn
+const char l59[] PROGMEM = "aj"; // atwn
+const char l5a[] PROGMEM = ""; // stwn
+const char l5b[] PROGMEM = ""; // astwn
+const char l5c[] PROGMEM = "dem"; // ctwn
+const char l5d[] PROGMEM = "adm"; // actwn
+const char l5e[] PROGMEM = ""; // sctwn
+const char l5f[] PROGMEM = "adj"; // asctwn
+
+const char l60[] PROGMEM = "y"; // hn
+const char l61[] PROGMEM = "ay"; // ahn
+const char l62[] PROGMEM = "sy"; // shn
+const char l63[] PROGMEM = "asy"; // ashn
+const char l64[] PROGMEM = "cy"; // chn
+const char l65[] PROGMEM = "acc"; // achn
+const char l66[] PROGMEM = ""; // schn
+const char l67[] PROGMEM = ""; // aschn
+const char l68[] PROGMEM =  "ty"; // thn
+const char l69[] PROGMEM = ""; // athn
+const char l6a[] PROGMEM = "sty"; // sthn
+const char l6b[] PROGMEM = ""; // asthn
+const char l6c[] PROGMEM = "dy"; // cthn
+const char l6d[] PROGMEM = "aff"; // acthn
+const char l6e[] PROGMEM = "gy"; // scthn
+const char l6f[] PROGMEM = "aft"; // ascthn
+
+const char l70[] PROGMEM = "my"; // whn
+const char l71[] PROGMEM = ""; // awhn
+const char l72[] PROGMEM = ""; // swhn
+const char l73[] PROGMEM = ""; // aswhn
+const char l74[] PROGMEM = "py"; // cwhn
+const char l75[] PROGMEM = ""; // acwhn
+const char l76[] PROGMEM = "spy"; // scwhn
+const char l77[] PROGMEM = "asphy"; // ascwhn
+const char l78[] PROGMEM = "kn"; // twhn
+const char l79[] PROGMEM = "ackn"; // atwhn
+const char l7a[] PROGMEM = "xy"; // stwhn
+const char l7b[] PROGMEM = ""; // astwhn
+const char l7c[] PROGMEM = "by"; // ctwhn
+const char l7d[] PROGMEM = "aby"; // actwhn
+const char l7e[] PROGMEM = ""; // scthnr
+const char l7f[] PROGMEM = "affl"; // ascthnr
+
+const char l80[] PROGMEM = "r"; 
+const char l81[] PROGMEM = "ar"; // ar
+const char l82[] PROGMEM = "ser"; // sr
+const char l83[] PROGMEM = "arr"; // asr 
+const char l84[] PROGMEM = "cr"; // cr
+const char l85[] PROGMEM = "acr"; // acr 
+const char l86[] PROGMEM = "scr"; // scr
+const char l87[] PROGMEM = "ascr"; // ascr
+const char l88[] PROGMEM = "tr";  // tr 
+const char l89[] PROGMEM = "atr"; // atr
+const char l8a[] PROGMEM = "str"; // str
+const char l8b[] PROGMEM = ""; // astr 
+const char l8c[] PROGMEM = "dr"; // ctr
+const char l8d[] PROGMEM = "adr"; // actr
+const char l8e[] PROGMEM = "gr"; // sctr
+const char l8f[] PROGMEM = "agr"; // asctr
+
+const char l90[] PROGMEM = "wr"; // wr
+const char l91[] PROGMEM = ""; // awr
+const char l92[] PROGMEM = ""; // swr
+const char l93[] PROGMEM = ""; // aswr
+const char l94[] PROGMEM = "pr"; // cwr
+const char l95[] PROGMEM = "apr"; // acwr
+const char l96[] PROGMEM = "spr"; // scwr
+const char l97[] PROGMEM = "appr"; // ascwr 
+const char l98[] PROGMEM = ""; // twr
+const char l99[] PROGMEM = "attr"; // atwr
+const char l9a[] PROGMEM = "xr"; // stwr
+const char l9b[] PROGMEM = ""; // astwr
+const char l9c[] PROGMEM = "der"; // ctwr
+const char l9d[] PROGMEM = "addr"; // actwr
+const char l9e[] PROGMEM = ""; // sctwr
+const char l9f[] PROGMEM = "aggr"; // asctwr
+
+const char la0[] PROGMEM = "rh"; // hr
+const char la1[] PROGMEM = ""; // ahr 
+const char la2[] PROGMEM = "shr"; // shr
+const char la3[] PROGMEM = ""; // ashr
+const char la4[] PROGMEM = "chr"; // chr
+const char la5[] PROGMEM = "accr"; // achr
+const char la6[] PROGMEM = ""; // schr
+const char la7[] PROGMEM = ""; // aschr
+const char la8[] PROGMEM = "thr"; // thr
+const char la9[] PROGMEM = ""; // athr
+const char laa[] PROGMEM = ""; // sthr
+const char lab[] PROGMEM = ""; // asthr
+const char lac[] PROGMEM = "fr"; // cthr
+const char lad[] PROGMEM = "afr"; // acthr
+const char lae[] PROGMEM = ""; // scthr
+const char laf[] PROGMEM = "affr"; // ascthr
+
+const char lb0[] PROGMEM = ""; // whr 
+const char lb1[] PROGMEM = ""; // awhr
+const char lb2[] PROGMEM = ""; // swhr
+const char lb3[] PROGMEM = ""; // aswhr
+const char lb4[] PROGMEM = "phr"; // cwhr
+const char lb5[] PROGMEM = "aphr"; // acwhr 
+const char lb6[] PROGMEM = ""; // scwhr 
+const char lb7[] PROGMEM = ""; // ascwhr
+const char lb8[] PROGMEM = "kr"; // twhr
+const char lb9[] PROGMEM = ""; // atwhr
+const char lba[] PROGMEM = ""; // stwhr
+const char lbb[] PROGMEM = ""; // astwhr
+const char lbc[] PROGMEM = "br"; // ctwhr
+const char lbd[] PROGMEM = "abr"; // actwhr
+const char lbe[] PROGMEM = ""; // sctwhr
+const char lbf[] PROGMEM = "abbr"; // asctwhr
+
+const char lc0[] PROGMEM = "l"; // nr
+const char lc1[] PROGMEM = "al"; // anr
+const char lc2[] PROGMEM = "sl"; // snr
+const char lc3[] PROGMEM = "asl"; // asnr 
+const char lc4[] PROGMEM = "cl"; // cnr
+const char lc5[] PROGMEM = ""; // acnr
+const char lc6[] PROGMEM = ""; // scnr
+const char lc7[] PROGMEM = ""; // ascnr
+const char lc8[] PROGMEM = "q"; // tnr
+const char lc9[] PROGMEM = "aq"; // atnr
+const char lca[] PROGMEM = "sq"; // stnr
+const char lcb[] PROGMEM = "asq"; // astnr
+const char lcc[] PROGMEM = "del"; // ctnr
+const char lcd[] PROGMEM = "acq"; // actnr
+const char lce[] PROGMEM = "gl"; // sctnr
+const char lcf[] PROGMEM = "agl"; // asctnr
+
+const char ld0[] PROGMEM = "mr"; // wnr
+const char ld1[] PROGMEM = "all"; // awnr
+const char ld2[] PROGMEM = ""; // swnr
+const char ld3[] PROGMEM = ""; // aswnr
+const char ld4[] PROGMEM = "pl"; // cwnr
+const char ld5[] PROGMEM = "apl"; // acwnr
+const char ld6[] PROGMEM = "spl"; // scwnr
+const char ld7[] PROGMEM = "appl"; // ascwnr
+const char ld8[] PROGMEM = "jer"; // twnr
+const char ld9[] PROGMEM = ""; // atwnr
+const char lda[] PROGMEM = "serv"; // stwnr
+const char ldb[] PROGMEM = ""; // astwnr
+const char ldc[] PROGMEM = ""; // ctwnr
+const char ldd[] PROGMEM = "addl"; // actwnr
+const char lde[] PROGMEM = ""; // sctwnr
+const char ldf[] PROGMEM = "aggl"; // asctwnr
+
+const char le0[] PROGMEM = "ly"; // hnr
+const char le1[] PROGMEM = ""; // ahnr
+const char le2[] PROGMEM = "sly"; // shnr
+const char le3[] PROGMEM = ""; // ashnr
+const char le4[] PROGMEM = "cry"; // chnr
+const char le5[] PROGMEM = "accl"; // achnr
+const char le6[] PROGMEM = ""; // schnr
+const char le7[] PROGMEM = ""; // aschnr
+const char le8[] PROGMEM = "try"; // thnr
+const char le9[] PROGMEM = "athl"; // athnr
+const char lea[] PROGMEM = "stry"; // sthnr
+const char leb[] PROGMEM = ""; // asthnr
+const char lec[] PROGMEM = "fl"; // cthnr
+const char led[] PROGMEM = "afl"; // acthnr
+const char lee[] PROGMEM = ""; // scthnr
+const char lef[] PROGMEM = "affl"; // ascthnr
+
+const char lf0[] PROGMEM = ""; // whnr
+const char lf1[] PROGMEM = ""; // awhnr
+const char lf2[] PROGMEM = ""; // swhnr
+const char lf3[] PROGMEM = ""; // aswhnr
+const char lf4[] PROGMEM = "phl"; // cwhnr
+const char lf5[] PROGMEM = ""; // acwhnr
+const char lf6[] PROGMEM = ""; // scwhnr
+const char lf7[] PROGMEM = ""; // ascwhnr
+const char lf8[] PROGMEM = "kl"; // twhnr
+const char lf9[] PROGMEM = ""; // atwhnr
+const char lfa[] PROGMEM = ""; // stwhnr
+const char lfb[] PROGMEM = ""; // astwhnr
+const char lfc[] PROGMEM = "bl"; // ctwhnr
+const char lfd[] PROGMEM = "abl"; // actwhnr
+const char lfe[] PROGMEM = ""; // sctwhnr
+const char lff[] PROGMEM = ""; // asctwhnr
 
 const char* const left_side[] PROGMEM = {
-  l0, l1, l2, l3, l4, l5, l6, l7, l8, l9,
-  l10, l11, l12, l13, l14, l15, l16, l17, l18, l19,
-  l20, l21, l22, l23, l24, l25, l26, l27, l28, l29,
-  l30, l31, l32, l33, l34, l35, l36, l37, l38, l39,
-  l40, l41, l42, l43, l44, l45, l46, l47, l48, l49,
-  l50, l51, l52, l53, l54, l55, l56, l57, l58, l59,
-  l60, l61, l62, l63, l64, l65, l66, l67, l68, l69,
-  l70, l71, l72, l73, l74, l75, l76, l77, l78, l79,
-  l80, l81, l82, l83, l84, l85, l86, l87, l88, l89,
-  l90, l91, l92, l93, l94, l95, l96, l97, l98, l99,
-  l100, l101, l102, l103, l104, l105, l106, l107, l108, l109,
-  l110, l111, l112, l113, l114, l115, l116, l117, l118, l119,
-  l120, l121, l122, l123, l124, l125, l126, l127, l128, l129,
-  l130, l131, l132, l133, l134, l135, l136, l137, l138, l139,
-  l140, l141, l142, l143, l144, l145, l146, l147, l148, l149,
-  l150, l151, l152, l153, l154, l155, l156, l157, l158, l159,
-  l160, l161, l162, l163, l164, l165, l166, l167, l168, l169,
-  l170, l171, l172, l173, l174, l175, l176, l177, l178, l179,
-  l180, l181, l182, l183, l184, l185, l186, l187, l188, l189,
-  l190, l191, l192, l193, l194, l195, l196, l197, l198, l199,
-  l200, l201, l202, l203, l204, l205, l206, l207, l208, l209,
-  l210, l211, l212, l213, l214, l215, l216, l217, l218, l219,
-  l220, l221, l222, l223, l224, l225, l226, l227, l228, l229,
-  l230, l231, l232, l233, l234, l235, l236, l237, l238, l239,
-  l240, l241, l242, l243, l244, l245, l246, l247, l248, l249,
-  l250, l251, l252, l253, l254, l255
+  l00, l01, l02, l03, l04, l05, l06, l07,
+  l08, l09, l0a, l0b, l0c, l0d, l0e, l0f,
+
+  l10, l11, l12, l13, l14, l15, l16, l17,
+  l18, l19, l1a, l1b, l1c, l1d, l1e, l1f,
+
+  l20, l21, l22, l23, l24, l25, l26, l27,
+  l28, l29, l2a, l2b, l2c, l2d, l2e, l2f,
+
+  l30, l31, l32, l33, l34, l35, l36, l37,
+  l38, l39, l3a, l3b, l3c, l3d, l3e, l3f,
+
+  l40, l41, l43, l43, l44, l45, l46, l47,
+  l48, l49, l4a, l4b, l4c, l4d, l4e, l4f,
+
+  l50, l51, l52, l53, l54, l55, l56, l57,
+  l58, l59, l5a, l5b, l5c, l5d, l5e, l5f,
+
+  l60, l61, l62, l63, l64, l65, l66, l67,
+  l68, l69, l6a, l6b, l6c, l6d, l6e, l6f,
+
+  l70, l71, l72, l73, l74, l75, l76, l77,
+  l78, l79, l7a, l7b, l7c, l7d, l7e, l7f,
+
+  l80, l81, l82, l83, l84, l85, l86, l87,
+  l88, l89, l8a, l8b, l4c, l4d, l8e, l8f,
+
+  l90, l91, l92, l93, l94, l95, l96, l97,
+  l98, l99, l9a, l9b, l9c, l9d, l9e, l9f,
+
+  la0, la1, la2, la3, la4, la5, la6, la7,
+  la8, la9, laa, lab, lac, lad, lae, laf,
+
+  lb0, lb1, lb2, lb3, lb4, lb5, lb6, lb7,
+  lb8, lb9, lba, lbb, lbc, lbd, lbe, lbf,
+
+  lc0, lc1, lc2, lc3, lc4, lc5, lc6, lc7,
+  lc8, lc9, lca, lcb, lcc, lcd, lce, lcf,
+
+  ld0, ld1, ld2, ld3, ld4, ld5, ld6, ld7,
+  ld8, ld9, lda, ldb, ldc, ldd, lde, ldf,
+
+  le0, le1, le2, le3, le4, le5, le6, le7,
+  le8, le9, lea, leb, lec, led, lee, lef,
+
+  lf0, lf1, lf2, lf3, lf4, lf5, lf6, lf7,
+  lf8, lf9, lfa, lfb, lfc, lfd, lfe, lff
 };
 
 void sendLeft() {
