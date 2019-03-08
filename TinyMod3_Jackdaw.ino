@@ -97,7 +97,7 @@ void maybeSpace() {
 
 void numbers() { // number key is pressed if we got here
   if (ekey) {
-    if (left & 0x02) {spit("11"); return;}
+    if (left & 0x03) {spit("11"); return;}
     if (left & 0x04) {spit("22"); return;}
     if (left & 0x10) {spit("33"); return;}
     if (left & 0x40) {spit("44"); return;}
@@ -118,10 +118,10 @@ void numbers() { // number key is pressed if we got here
     if (left & 0x40) Keyboard.write('4');
     if (left & 0x10) Keyboard.write('3');
     if (left & 0x04) Keyboard.write('2');
-    if (left & 0x02) Keyboard.write('1');
+    if (left & 0x03) Keyboard.write('1');
     return;
   }
-  if (left & 0x02) Keyboard.write('1');
+  if (left & 0x03) Keyboard.write('1');
   if (left & 0x04) Keyboard.write('2');
   if (left & 0x10) Keyboard.write('3');
   if (left & 0x40) Keyboard.write('4');
@@ -138,6 +138,7 @@ boolean commands() { // before "maybeSpace()"
   if(star & !right & !left & !center & !(ekey | ykey)) {
     Keyboard.write(KEY_BACKSPACE); spacing = false; return true;
   }
+
   if (center == 0) {
     if(left == 0x14) {
       if(right == 0x14) {Keyboard.write('.'); caps = true; return true;}
@@ -253,6 +254,9 @@ void spitter (String a) {
 }
 
 boolean briefs() { // after "maybeSpace()"
+  if ((center == 0x0c) & (left == 0xaa) & (right == 0)) {
+    spitter ("I"); return true;
+  }
   if(center == 0) {
     if (right == 0x55) {  // rlct
       if (left == 0x08) {spit("~"); return true;} // Tilde
@@ -341,7 +345,6 @@ void moving(byte a) {
 
 boolean movement() {
   if((data[0] == 0x00) & (data[4] == 0x00) & (data[2] == 0x0f)) {
-//    delay(20); // debounce the key?
     if(data[1] == 0x01) {moving(KEY_LEFT_ARROW); return true;}
     if(data[3] == 0x02) {moving(KEY_UP_ARROW); return true;}
     if(data[1] == 0x02) {moving(KEY_DOWN_ARROW); return true;}
@@ -358,7 +361,7 @@ boolean movement() {
 void scan(){
   leaving = false;
   do {
-    for(int i=0; i<NO_BYTES; i++) data[i] = 0; // i * 0x40; // zero data
+    for(int i=0; i<NO_BYTES; i++) data[i] = 0;
     do {look();} while(!pressed); delay(20);
   } while(!pressed);
   do {
