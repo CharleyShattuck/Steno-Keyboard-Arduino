@@ -248,6 +248,10 @@ boolean commands() { // before "maybeSpace()"
   return false;
 }
 
+void spitter (String a) {
+  spit (a); spacing = true; return;
+}
+
 boolean briefs() { // after "maybeSpace()"
   if(center == 0) {
     if (right == 0x55) {  // rlct
@@ -271,37 +275,37 @@ boolean briefs() { // after "maybeSpace()"
       if (left == 0x40) {Keyboard.write(KEY_INSERT); return true;} // iNseRt
       if (left == 0xcc) {Keyboard.write(KEY_DELETE); return true;} // DeLete
     }
-    if (right == 0x04) {
-      if (left == 0x01) {spit("A"); return true;}
-      if (left == 0x3c) {spit("B"); return true;}
-      if (left == 0x04) {spit("C"); return true;}
-      if (left == 0x0c) {spit("D"); return true;}
-      if (left == 0x2c) {spit("F"); return true;}
-      if (left == 0x0e) {spit("G"); return true;}
-      if (left == 0x20) {spit("H"); return true;}
-      if (left == 0x58) {spit("J"); return true;}
-      if (left == 0x38) {spit("K"); return true;}
-      if (left == 0xc0) {spit("L"); return true;}
-      if (left == 0x50) {spit("M"); return true;}
-      if (left == 0x40) {spit("N"); return true;}
-      if (left == 0x14) {spit("P"); return true;}
-      if (left == 0xc8) {spit("Q"); return true;}
-      if (left == 0x80) {spit("R"); return true;}
-      if (left == 0x02) {spit("S"); return true;}
-      if (left == 0x08) {spit("T"); return true;}
-      if (left == 0x48) {spit("V"); return true;}
-      if (left == 0x10) {spit("W"); return true;}
-      if (left == 0x1a) {spit("X"); return true;}
-      if (left == 0x60) {spit("Y"); return true;}
-      if (left == 0x44) {spit("Z"); return true;}
+    if (right == 0x3f) {
+      if (left == 0x01) {spitter("A"); return true;}
+      if (left == 0x3c) {spitter("B"); return true;}
+      if (left == 0x04) {spitter("C"); return true;}
+      if (left == 0x0c) {spitter("D"); return true;}
+      if (left == 0x2c) {spitter("F"); return true;}
+      if (left == 0x0e) {spitter("G"); return true;}
+      if (left == 0x20) {spitter("H"); return true;}
+      if (left == 0x58) {spitter("J"); return true;}
+      if (left == 0x38) {spitter("K"); return true;}
+      if (left == 0xc0) {spitter("L"); return true;}
+      if (left == 0x50) {spitter("M"); return true;}
+      if (left == 0x40) {spitter("N"); return true;}
+      if (left == 0x14) {spitter("P"); return true;}
+      if (left == 0xc8) {spitter("Q"); return true;}
+      if (left == 0x80) {spitter("R"); return true;}
+      if (left == 0x02) {spitter("S"); return true;}
+      if (left == 0x08) {spitter("T"); return true;}
+      if (left == 0x48) {spitter("V"); return true;}
+      if (left == 0x10) {spitter("W"); return true;}
+      if (left == 0x1a) {spitter("X"); return true;}
+      if (left == 0x60) {spitter("Y"); return true;}
+      if (left == 0x44) {spitter("Z"); return true;}
     }
   }
-  if ((left == 0x00) & (right == 0x04)) {
-    if (center == 0x01) {spit("A"); return true;}
-    if (center == 0x02) {spit("O"); return true;}
-    if (center == 0x04) {spit("E"); return true;}
-    if (center == 0x08) {spit("U"); return true;}
-    if (center == 0x0c) {spit("I"); return true;}
+  if ((left == 0x00) & (right == 0x3f)) {
+    if (center == 0x01) {spitter("A"); return true;}
+    if (center == 0x02) {spitter("O"); return true;}
+    if (center == 0x04) {spitter("E"); return true;}
+    if (center == 0x08) {spitter("U"); return true;}
+    if (center == 0x0c) {spitter("I"); return true;}
   }
   return false;
 }
