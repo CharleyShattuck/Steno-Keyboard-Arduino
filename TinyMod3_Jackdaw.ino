@@ -9,8 +9,13 @@
 // modified March 6, 2019 for TinyMod3
 
 boolean pressed;
+#define PROTOCOL 7
 
 // four bytes for the TX Bolt protocol
+#define NO_BOLTS 4
+byte bolt[NO_BOLTS];
+
+// five bytes in the keyboard matrix
 #define NO_BYTES 5
 byte data[NO_BYTES];
 
@@ -38,8 +43,65 @@ void setup() {
   for(int i=0; i<NO_ROWS; i++){
     pinMode(row[i], OUTPUT); digitalWrite(row[i], HIGH);
   }
+  pinMode(PROTOCOL, INPUT_PULLUP);
+  if (digitalRead(PROTOCOL)) TX_BOLT();
   Keyboard.begin();
   delay(3000);
+}
+
+void scanTX() {
+  do {
+    for (int i = 0; i<NO_BYTES; i++) data[i] = 0;
+    do {look ();} while (!pressed); delay(20);
+  } while (!pressed);
+  do {look ();} while (pressed);
+}
+
+// TX Bolt protocol
+void sendTX(){
+  for (byte i = 0; i < NO_BOLTS; i++) {
+    bolt[i] = (i * 0x40);
+  }
+  if (data[4] & 0x01) bolt[0] |= 0x01; // S
+  if (data[2] & 0x01) bolt[0] |= 0x01; // S
+  if (data[4] & 0x02) bolt[0] |= 0x02; // T
+  if (data[2] & 0x02) bolt[0] |= 0x04; // K
+  if (data[4] & 0x04) bolt[0] |= 0x08; // P
+  if (data[2] & 0x04) bolt[0] |= 0x10; // W 
+  if (data[4] & 0x08) bolt[0] |= 0x20; // H
+
+  if (data[2] & 0x08) bolt[1] |= 0x01; // R
+  if (data[0] & 0x01) bolt[1] |= 0x02; // A
+  if (data[0] & 0x02) bolt[1] |= 0x04; // O
+  if (data[4] & 0x10) bolt[1] |= 0x08; // *
+  if (data[2] & 0x10) bolt[1] |= 0x08; // *
+  if (data[0] & 0x08) bolt[1] |= 0x10; // E
+  if (data[0] & 0x10) bolt[1] |= 0x20; // U 
+
+  if (data[3] & 0x01) bolt[2] |= 0x01; // F 
+  if (data[1] & 0x01) bolt[2] |= 0x02; // R
+  if (data[3] & 0x02) bolt[2] |= 0x04; // P
+  if (data[1] & 0x02) bolt[2] |= 0x08; // B
+  if (data[3] & 0x04) bolt[2] |= 0x10; // L 
+  if (data[1] & 0x04) bolt[2] |= 0x20; // G
+
+  if (data[3] & 0x08) bolt[3] |= 0x01; // T
+  if (data[1] & 0x08) bolt[3] |= 0x02; // S
+  if (data[3] & 0x10) bolt[3] |= 0x04; // D
+  if (data[1] & 0x10) bolt[3] |= 0x08; // Z
+  if (data[0] & 0x04) bolt[3] |= 0x10; // # 
+
+  for(int i=0; i<NO_BOLTS; i++) Serial.write(bolt[i]);
+  delay(20);  // wait a bit before scanning again    
+}
+
+void TX_BOLT() {
+  Serial.begin(9600);
+  delay(3000);
+  while(true) {
+    scanTX();
+    sendTX();
+  }
 }
 
 void organize(){
