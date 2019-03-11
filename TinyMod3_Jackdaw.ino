@@ -106,7 +106,6 @@ void TX_BOLT() {
 
 void organize(){
   left = 0;
-  // A key has room here for future hardware
   if (data[4] & 0x01) left |= 0x01; // a
   if (data[4] & 0x02) left |= 0x04; // c
   if (data[4] & 0x04) left |= 0x10; // w
@@ -154,7 +153,7 @@ void spit(String a) {
 }
 
 void maybeSpace() {
-  if (!star & spacing) Keyboard.write(' ');
+  if (star) Keyboard.write(' ');
 }
 
 void numbers() { // number key is pressed if we got here
@@ -197,10 +196,9 @@ void numbers() { // number key is pressed if we got here
 }
 
 boolean commands() { // before "maybeSpace()"
-  if(star & !right & !left & !center & !(ekey | ykey)) {
-    Keyboard.write(KEY_BACKSPACE); spacing = false; return true;
-  }
-
+//  if(star & !right & !left & !center & !(ekey | ykey)) {
+//    Keyboard.write(KEY_BACKSPACE); spacing = false; return true;
+//  }
   if (center == 0) {
     if(left == 0x14) {
       if(right == 0x14) {Keyboard.write('.'); caps = true; return true;}
@@ -240,12 +238,13 @@ boolean commands() { // before "maybeSpace()"
     if(left == 0xaa) {
       if(right == 0xa8) {caps = true; spacing = false; return true;}
       if(right == 0xaa) {caps = true; spacing = true; return true;}
-      if(right == 0x28) {caps = false; return true;}
+      if(right == 0x81) {caps = false; return true;}
       if(right == 0x55) {Keyboard.write(KEY_ESC); return true;}
       if(right == 0x15) {Keyboard.write(KEY_HOME); return true;}
       if(right == 0x2a) {Keyboard.write(KEY_END); return true;}
       if(right == 0x26) {Keyboard.write(KEY_PAGE_UP); return true;}
       if(right == 0x19) {Keyboard.write(KEY_PAGE_DOWN); return true;}
+// arrow keys go here      
       if(right == 0x0a) {
         Keyboard.press(KEY_LEFT_CTRL);
         Keyboard.write(KEY_LEFT_ARROW);
@@ -315,6 +314,10 @@ void spitter (String a) {
   spit (a); spacing = true; return;
 }
 
+void spitno (String a) {
+  spit (a); spacing = false; return;
+}
+
 boolean briefs() { // after "maybeSpace()"
   if ((center == 0x0c) & (left == 0xaa) & (right == 0)) {
     spitter ("I"); return true;
@@ -342,36 +345,36 @@ boolean briefs() { // after "maybeSpace()"
       if (left == 0xcc) {Keyboard.write(KEY_DELETE); return true;} // DeLete
     }
     if (right == 0x3f) {
-      if (left == 0x01) {spitter("A"); return true;}
-      if (left == 0x3c) {spitter("B"); return true;}
-      if (left == 0x04) {spitter("C"); return true;}
-      if (left == 0x0c) {spitter("D"); return true;}
-      if (left == 0x2c) {spitter("F"); return true;}
-      if (left == 0x0e) {spitter("G"); return true;}
-      if (left == 0x20) {spitter("H"); return true;}
-      if (left == 0x58) {spitter("J"); return true;}
-      if (left == 0x38) {spitter("K"); return true;}
-      if (left == 0xc0) {spitter("L"); return true;}
-      if (left == 0x50) {spitter("M"); return true;}
-      if (left == 0x40) {spitter("N"); return true;}
-      if (left == 0x14) {spitter("P"); return true;}
-      if (left == 0xc8) {spitter("Q"); return true;}
-      if (left == 0x80) {spitter("R"); return true;}
-      if (left == 0x02) {spitter("S"); return true;}
-      if (left == 0x08) {spitter("T"); return true;}
-      if (left == 0x48) {spitter("V"); return true;}
-      if (left == 0x10) {spitter("W"); return true;}
-      if (left == 0x1a) {spitter("X"); return true;}
-      if (left == 0x60) {spitter("Y"); return true;}
-      if (left == 0x44) {spitter("Z"); return true;}
+      if (left == 0x01) {spitno("A"); return true;}
+      if (left == 0x3c) {spitno("B"); return true;}
+      if (left == 0x04) {spitno("C"); return true;}
+      if (left == 0x0c) {spitno("D"); return true;}
+      if (left == 0x2c) {spitno("F"); return true;}
+      if (left == 0x0e) {spitno("G"); return true;}
+      if (left == 0x20) {spitno("H"); return true;}
+      if (left == 0x58) {spitno("J"); return true;}
+      if (left == 0x38) {spitno("K"); return true;}
+      if (left == 0xc0) {spitno("L"); return true;}
+      if (left == 0x50) {spitno("M"); return true;}
+      if (left == 0x40) {spitno("N"); return true;}
+      if (left == 0x14) {spitno("P"); return true;}
+      if (left == 0xc8) {spitno("Q"); return true;}
+      if (left == 0x80) {spitno("R"); return true;}
+      if (left == 0x02) {spitno("S"); return true;}
+      if (left == 0x08) {spitno("T"); return true;}
+      if (left == 0x48) {spitno("V"); return true;}
+      if (left == 0x10) {spitno("W"); return true;}
+      if (left == 0x1a) {spitno("X"); return true;}
+      if (left == 0x60) {spitno("Y"); return true;}
+      if (left == 0x44) {spitno("Z"); return true;}
     }
   }
   if ((left == 0x00) & (right == 0x3f)) {
-    if (center == 0x01) {spitter("A"); return true;}
-    if (center == 0x02) {spitter("O"); return true;}
-    if (center == 0x04) {spitter("E"); return true;}
-    if (center == 0x08) {spitter("U"); return true;}
-    if (center == 0x0c) {spitter("I"); return true;}
+    if (center == 0x01) {spitno("A"); return true;}
+    if (center == 0x02) {spitno("O"); return true;}
+    if (center == 0x04) {spitno("E"); return true;}
+    if (center == 0x08) {spitno("U"); return true;}
+    if (center == 0x0c) {spitno("I"); return true;}
   }
   return false;
 }
@@ -1142,14 +1145,19 @@ void sendRight() {
 void run() {
   scan(); if(leaving) return;
   organize();
+  if ((number) & (left == 0) & (right == 0) & (center == 0) & !star) {
+    Keyboard.write (' '); return;
+  }
+  if ((star) & (left == 0) & (right == 0) & (center == 0) & !number) {
+    Keyboard.write (KEY_BACKSPACE); return;
+  }
+  maybeSpace();
   if ((number) & (!star) & (!center)) {numbers(); return;}
   if (commands()) return;
-  maybeSpace();
   if (briefs()) return;
   sendLeft();
   sendCenter();
   sendRight();
-  spacing = true;
 }
 
 void loop() {
