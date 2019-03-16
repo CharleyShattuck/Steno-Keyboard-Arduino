@@ -24,7 +24,7 @@ int H = 0; // dictionary pointer, HERE
   code  32b  the 32 bit token to be compiled,
         negative if it's a primitive, (inverted)
         positive address if it's a colon definition
-  data  variable  a list to execute to or a data field of some kind
+  data  32b at least  a list to execute or a data field of some kind
 
   when compiling the code value is compiled, unless this is an
   immediate word, in which case the word is executed
@@ -48,6 +48,7 @@ void _plus (void);
 void _dot (void);
 void _dotS (void);
 void _cr (void);
+void _space (void);
 // void _minus (void);
 // void _or (void);
 // void _xor (void);
@@ -96,6 +97,8 @@ void (*primitive []) (void) = {
 #define _DOTS ~14
   _cr,
 #define _CR ~15
+  _space,
+#define _SPACE ~16
 };
 
 //  primitives
@@ -181,7 +184,7 @@ void _dotS (void) {
   W = S0;
   do {
     Serial.print (memory [W--]);
-    Serial.print (" ");
+    Serial.write (' ');
   } while (S < W);
 }
 
@@ -189,33 +192,35 @@ void _cr (void) {
   Serial.println (" ");
 }
 
+void _space (void) {
+  Serial.write (' ');
+}
+
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
 void setup() {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
-  I = 8; // initialize instruction pointer
-  memory [0] = 0;
-  memory [1] = 0; // link
-  memory [2] = 0; // name, figure later
-  memory [3] = 4; // code at address 4
-  memory [4] = _LIT;
-  memory [5] =  0x20; // push space char onto the stack
-  memory [6] = _EMIT;
-  memory [7] = _EXIT;
+  I = 0; // initialize instruction pointer
+  memory [0] = _BRANCH;
+  memory [1] =  9; // reset vector
+  memory [2] = 0; // name, figure out later
+  memory [3] = 0; // link
+  memory [4] = 5; // code at address 5
+  memory [5] = _LIT;
+  memory [6] = 'X';
+  memory [7] = _EMIT;
+  memory [8] = _EXIT;
 //////////
-  memory [8] = _KEY;
-  memory [9] = _DUP;
-  memory [10] = _DOTS;
-  memory [11] = _CR;
-  memory [12] = _DROP;
-  memory [13] = _DROP;
-//  memory [11] = _EMIT;
-//  memory [12] = 4; // space
-//  memory [13] = _DOTS;
-//  memory [14] = 4; // space
-  memory [14] = _BRANCH;
-  memory [15] =  8;
+  memory [9] = _KEY;
+  memory [10] = _DUP;
+  memory [11] = _DOTS;
+  memory [12] = _CR;
+  memory [13] = _EMIT;
+  memory [14] = 5;
+  memory [15] = _DOT;
+  memory [16] = _BRANCH;
+  memory [17] =  9;
 
 //  memory [0] = _LIT; // lit
 //  memory [1] =  0x41; // 'A'
@@ -227,19 +232,19 @@ void setup() {
 //  memory [7] = _BRANCH; // branch
 //  memory [8] =  0x02; //  address
   Serial.begin (9600);
-  delay (1000);
+  delay (5000);
   Serial.println ("myForth for Arm");
 }
 
 // the loop function runs over and over again forever
 void loop() {
   W = memory [I++];
-  if (W < 0) {  // primitives are inverted
+  if (W < 0) {  // primitives are inverted, therefore negative
     primitive [~W] (); // execute primitive
   } else { // high level words are just addresses
     memory [--R] = I; // nest
     I = W; // into a high level word
   }
-  delay (100);
+//  delay (100);
 }
 
