@@ -46,6 +46,8 @@ void _store (void);
 void _comma (void);
 void _plus (void);
 void _dot (void);
+void _dotS (void);
+void _cr (void);
 // void _minus (void);
 // void _or (void);
 // void _xor (void);
@@ -90,6 +92,10 @@ void (*primitive []) (void) = {
 #define _COMMA ~12
   _dot,
 #define _DOT ~13
+  _dotS,
+#define _DOTS ~14
+  _cr,
+#define _CR ~15
 };
 
 //  primitives
@@ -171,12 +177,24 @@ void _dot (void) {
   Serial.write (' ');
 }
 
+void _dotS (void) {
+  W = S0;
+  do {
+    Serial.print (memory [W--]);
+    Serial.print (" ");
+  } while (S < W);
+}
+
+void _cr (void) {
+  Serial.println (" ");
+}
+
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
 void setup() {
-  S = S0;
-  R = R0;
-  I = 8;
+  S = S0; // initialize data stack
+  R = R0; // initialize return stack
+  I = 8; // initialize instruction pointer
   memory [0] = 0;
   memory [1] = 0; // link
   memory [2] = 0; // name, figure later
@@ -188,12 +206,16 @@ void setup() {
 //////////
   memory [8] = _KEY;
   memory [9] = _DUP;
-  memory [10] = _EMIT;
-  memory [11] = 4; // space
-  memory [12] = _DOT;
-  memory [13] = 4; // space
-  memory [13] = _BRANCH;
-  memory [14] =  8;
+  memory [10] = _DOTS;
+  memory [11] = _CR;
+  memory [12] = _DROP;
+  memory [13] = _DROP;
+//  memory [11] = _EMIT;
+//  memory [12] = 4; // space
+//  memory [13] = _DOTS;
+//  memory [14] = 4; // space
+  memory [14] = _BRANCH;
+  memory [15] =  8;
 
 //  memory [0] = _LIT; // lit
 //  memory [1] =  0x41; // 'A'
