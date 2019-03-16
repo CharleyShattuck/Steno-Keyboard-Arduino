@@ -8,7 +8,13 @@
 #define RAM_SIZE 0x1000
 #define S0 0x1000
 #define R0 0x0f00 
+#define M(a, b) {memory [a] = b;}
+#define NAME(m, c, x, y, z) {memory [m] = c + (x << 8) + (y << 16) + (z << 24);}
+#define LINK(m, a) {memory [m] = a;}
+#define CODE(m, a) {memory [m] = a;}
+#define LIST(m, a) {memory [m] = a;}
 
+ 
 // global variables
 int memory[RAM_SIZE]; // RAM is 32 bit word-addressed
 int S = S0; // data stack pointer
@@ -196,41 +202,51 @@ void _space (void) {
   Serial.write (' ');
 }
 
+
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
 void setup() {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
-  I = 0; // initialize instruction pointer
-  memory [0] = _BRANCH;
-  memory [1] =  9; // reset vector
-  memory [2] = 0; // name, figure out later
-  memory [3] = 0; // link
-  memory [4] = 5; // code at address 5
-  memory [5] = _LIT;
-  memory [6] = 'X';
-  memory [7] = _EMIT;
-  memory [8] = _EXIT;
-//////////
-  memory [9] = _KEY;
-  memory [10] = _DUP;
-  memory [11] = _DOTS;
-  memory [12] = _CR;
-  memory [13] = _EMIT;
-  memory [14] = 5;
-  memory [15] = _DOT;
-  memory [16] = _BRANCH;
-  memory [17] =  9;
+  I = 20; // initialize instruction pointer
+// initialize dictionary
 
-//  memory [0] = _LIT; // lit
-//  memory [1] =  0x41; // 'A'
-//  memory [2] = _DUP; // dup
-//  memory [3] = _EMIT; // emit
-//  memory [4] = _LIT; // lit
-//  memory [5] =  0x01; //  1
-//  memory [6] = _PLUS; // +
-//  memory [7] = _BRANCH; // branch
-//  memory [8] =  0x02; //  address
+// space
+  NAME(0, 5, 's', 'p', 'a')
+  LINK(1, 0)
+  CODE(2, _SPACE)
+  LIST(3, _SPACE)
+  LIST(4, _EXIT)
+// cr
+  NAME(5, 2, 'c', 'r', ' ')
+  LINK(6, 1)
+  CODE(7, _CR)
+  LIST(8, _CR)
+  LIST(9, _EXIT)
+// .
+  NAME(10, 1, '.', ' ', ' ')
+  LINK(11, 6)
+  CODE(12, _DOT)
+  LIST(13, _DOT)
+  LIST(14, _EXIT)
+// .s
+  NAME(15, 2, '.', 's', ' ')
+  LINK(16, 11)
+  CODE(17, _DOTS)
+  LIST(18, _DOTS)
+  LIST(19, _EXIT)
+
+// test
+  M(20, _KEY)
+  M(21, _DUP)
+  M(22, _EMIT)
+  M(23, 3) // space
+  M(24, _DOT)
+  M(25, 3) // space
+  M(26, _DOTS)
+  M(27, _BRANCH)
+  M(28, 20)
+
   Serial.begin (9600);
   delay (5000);
   Serial.println ("myForth for Arm");
