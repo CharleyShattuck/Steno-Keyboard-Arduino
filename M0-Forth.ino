@@ -7,15 +7,29 @@
 
 #define RAM_SIZE 0x1000
 #define S0 0x1000
-#define R0 0x0fff 
+#define R0 0x0f00 
 
 // global variables
-int memory[RAM_SIZE];
+int memory[RAM_SIZE]; // RAM is 32 bit word-addressed
 int S = S0; // data stack pointer
 int R = R0; // return stack pointer
 int I = 0; // instruction pointer
 int W = 0; // working register
 int T = 0; // top of stack
+int H = 0; // dictionary pointer, HERE
+
+/*  A word in the dictionary has these fields:
+  link  32b  point to next word in list, 0 says end of list
+  name  32b  a 32 bit int, made up of byte count and three letters
+  code  32b  the 32 bit token to be compiled,
+        negative if it's a primitive, (inverted)
+        positive address if it's a colon definition
+  data  variable  a list to execute to or a data field of some kind
+
+  when compiling the code value is compiled, unless this is an
+  immediate word, in which case the word is executed
+  a bit in the the count field should be the immediate bit
+*/
 
 // function prototypes for the primitives
 void _lit (void);
@@ -29,12 +43,15 @@ void _drop (void);
 void _swap (void);
 void _fetch (void);
 void _store (void);
+void _comma (void);
 void _plus (void);
+void _dot (void);
 // void _minus (void);
 // void _or (void);
 // void _xor (void);
 // void _and (void);
 // void _invert (void);
+// void _negate (void);
 // void _zeroequal (void);
 // void _zeroless (void);
 // void _times (void);
@@ -69,6 +86,10 @@ void (*primitive []) (void) = {
 #define _FETCH ~10
   _store,
 #define _STORE ~11
+  _comma,
+#define _COMMA ~12
+  _dot,
+#define _DOT ~13
 };
 
 //  primitives
@@ -95,7 +116,9 @@ void _0branch (void) {
 }
 
 void _key (void) {
-
+  while (!Serial.available ()) ;
+  T = Serial.read ();
+  memory [--S] = T;
 }
 
 void _emit (void) {
@@ -137,23 +160,53 @@ void _store (void) {
   memory [T] = W;
 }
 
+void _comma (void) {
+  T = memory [S++];
+  memory [H++] = T;
+}
+
+void _dot (void) {
+  T = memory [S++];
+  Serial.print (T);
+  Serial.write (' ');
+}
+
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
 void setup() {
   S = S0;
   R = R0;
-  I = 0;
-  memory [0] = _LIT; // lit
-  memory [1] =  0x41; // 'A'
-  memory [2] = _DUP; // dup
-  memory [3] = _EMIT; // emit
-  memory [4] = _LIT; // lit
-  memory [5] =  0x01; //  1
-  memory [6] = _PLUS; // +
-  memory [7] = _BRANCH; // branch
-  memory [8] =  0x02; //  address
+  I = 8;
+  memory [0] = 0;
+  memory [1] = 0; // link
+  memory [2] = 0; // name, figure later
+  memory [3] = 4; // code at address 4
+  memory [4] = _LIT;
+  memory [5] =  0x20; // push space char onto the stack
+  memory [6] = _EMIT;
+  memory [7] = _EXIT;
+//////////
+  memory [8] = _KEY;
+  memory [9] = _DUP;
+  memory [10] = _EMIT;
+  memory [11] = 4; // space
+  memory [12] = _DOT;
+  memory [13] = 4; // space
+  memory [13] = _BRANCH;
+  memory [14] =  8;
+
+//  memory [0] = _LIT; // lit
+//  memory [1] =  0x41; // 'A'
+//  memory [2] = _DUP; // dup
+//  memory [3] = _EMIT; // emit
+//  memory [4] = _LIT; // lit
+//  memory [5] =  0x01; //  1
+//  memory [6] = _PLUS; // +
+//  memory [7] = _BRANCH; // branch
+//  memory [8] =  0x02; //  address
   Serial.begin (9600);
   delay (1000);
+  Serial.println ("myForth for Arm");
 }
 
 // the loop function runs over and over again forever
