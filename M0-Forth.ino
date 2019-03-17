@@ -72,6 +72,7 @@ void _space (void);
 void _zeroequal (void);
 void _zeroless (void);
 void _words (void);
+void _find (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -141,8 +142,10 @@ void (*primitive []) (void) = {
 #define _ZEROEQUAL ~31
   _zeroless,
 #define _ZEROLESS ~32
-  _words
+  _words,
 #define _WORDS ~33
+  _find
+#define _FIND ~34
 };
 
 // primitive definitions
@@ -344,8 +347,6 @@ void _words (void) {
   while (W) {
     T = memory [W];
     C = (T & 0xff);
-//    Serial.print (C);
-//    _space ();
     X = ((T >> 8) & 0xff);
     memory [--S] = X;
     _emit ();
@@ -364,6 +365,20 @@ void _words (void) {
     W = memory [++W];
   }
   _cr ();
+}
+
+void _find (void) {
+  int X = memory [S++];
+  W = D;
+  while (W) {
+    T = (memory [W] & 0xffffff3f);
+    if (T == X) {
+      memory [--S] = W;
+      return;
+    }
+    W = memory [++W];
+  }
+  memory [--S] = 0;
 }
 
 // the setup function runs once when you press reset or power the board
@@ -541,15 +556,25 @@ void setup() {
   LINK(130, 125)
   CODE(131, _WORDS)
   CODE(132, _EXIT)
-D = 129; // latest word
-H = 133; // top of dictionary
+// find
+  NAME(133, 0, 4, 'f', 'i', 'n')
+  LINK(134, 129)
+  CODE(135, _FIND)
+  CODE(136, _EXIT)
+
+D = 133; // latest word
+H = 137; // top of dictionary
 
 // test
-  M(200, 131)
-  M(201, _KEY)
-  M(202, _DROP)
-  M(203, _BRANCH)
-  M(204, 200)
+  M(200, _LIT)
+  M(201, 1)
+  M(202, _FETCH)
+  M(203, 135)
+  M(204, _DOT)
+  M(205, _KEY)
+  M(206, _DROP)
+  M(207, _BRANCH)
+  M(208, 200)
 
   Serial.begin (9600);
   delay (5000);
