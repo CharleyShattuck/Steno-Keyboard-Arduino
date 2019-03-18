@@ -73,6 +73,7 @@ void _zeroequal (void);
 void _zeroless (void);
 void _words (void);
 void _find (void);
+void _execute (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -144,8 +145,10 @@ void (*primitive []) (void) = {
 #define _ZEROLESS ~32
   _words,
 #define _WORDS ~33
-  _find
+  _find,
 #define _FIND ~34
+  _execute
+#define _EXECUTE ~35
 };
 
 // primitive definitions
@@ -381,6 +384,12 @@ void _find (void) {
   memory [--S] = 0;
 }
 
+void _execute (void) {
+  T = memory [S++];
+  memory [--R] = I;
+  I = (T + 2);
+ }
+
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
 // and the initial dictionary
@@ -561,20 +570,26 @@ void setup() {
   LINK(134, 129)
   CODE(135, _FIND)
   CODE(136, _EXIT)
+// execute
+  NAME(137, 0, 7, 'e', 'x', 'e')
+  LINK(138, 133)
+  CODE(139, _EXECUTE)
+  CODE(140, _EXIT)
 
-D = 133; // latest word
-H = 137; // top of dictionary
+D = 137; // latest word
+H = 141; // top of dictionary
 
 // test
   M(200, _LIT)
-  M(201, 1)
+  M(201, 21) // dup
   M(202, _FETCH)
-  M(203, 135)
-  M(204, _DOT)
-  M(205, _KEY)
-  M(206, _DROP)
-  M(207, _BRANCH)
-  M(208, 200)
+  M(203, 135) // find
+  M(204, _EXECUTE)
+  M(205, _DOTS)
+  M(206, _KEY)
+  M(207, _DROP)
+  M(208, _BRANCH)
+  M(209, 200)
 
   Serial.begin (9600);
   delay (5000);
