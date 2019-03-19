@@ -75,6 +75,8 @@ void _words (void);
 void _find (void);
 void _execute (void);
 void _word (void);
+void _hdot (void);
+void _qdup (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -134,24 +136,28 @@ void (*primitive []) (void) = {
 #define _STARSLASH ~26
   _dot,
 #define _DOT ~27
+  _hdot,
+#define _HDOT ~28
   _dotS,
-#define _DOTS ~28
+#define _DOTS ~29
   _cr,
-#define _CR ~29
+#define _CR ~30
   _space,
-#define _SPACE ~30
+#define _SPACE ~31
   _twostar,
-#define _ZEROEQUAL ~31
+#define _ZEROEQUAL ~32
   _zeroless,
-#define _ZEROLESS ~32
+#define _ZEROLESS ~33
   _words,
-#define _WORDS ~33
+#define _WORDS ~34
   _find,
-#define _FIND ~34
+#define _FIND ~35
   _execute,
-#define _EXECUTE ~35
-  _word
-#define _WORD ~36
+#define _EXECUTE ~36
+  _word,
+#define _WORD ~37
+  _qdup
+#define _QDUP ~38
 };
 
 // primitive definitions
@@ -324,18 +330,34 @@ void _zeroless (void) {
   }
 }
 
+void _qdup (void) {
+  T = memory [S];
+  if (T == 0) return;
+  memory [--S] = T;
+}
+
 void _dot (void) {
   T = memory [S++];
   Serial.print (T);
   Serial.write (' ');
 }
 
+void _hdot (void) {
+  T = memory [S++];
+  Serial.print (T, HEX);
+  Serial.write (' ');
+}
+
 void _dotS (void) {
+  if (S == S0) {
+    Serial.print ("empty ");
+    return;
+  }
   W = S0;
-  do {
-    Serial.print (memory [W--]);
-    Serial.write (' ');
-  } while (S < W);
+  while (W > S) {
+    Serial.print (memory [--W]);
+    Serial.write (' ');      
+  }
 }
 
 void _cr (void) {
@@ -376,8 +398,8 @@ void _words (void) {
 void _find (void) {
   int X = memory [S++];
   W = D;
-  while (W) {
-    T = (memory [W] & 0xffffff3f);
+  while (W != 0) {
+    T = (memory [W]);
     if (T == X) {
       memory [--S] = W;
       return;
@@ -397,28 +419,40 @@ void _word (void) {
   int count = 0;
   W = 0;
   while (1) {
-    while (!(Serial.available ()));
+    T = 0;
+    while (Serial.available () == 0); 
     T = Serial.read ();
     if (T <= ' ') {
       W |= count;
       memory [--S] = W;
+//      Serial.print (count, DEC); _space ();
+//      Serial.print (T, HEX); _space ();
+//      Serial.print (W, HEX); _cr ();
       return;
     }
     count += 1;
     if (count == 1) {
       W |= (T << 8);
-      count += 1;
+//      Serial.print (count, DEC); _space ();
+//      Serial.print (T, HEX); _space ();
+//      Serial.print (W, HEX); _space ();
     }
     if (count == 2) {
       W |= (T << 16);
-      count += 1;
+//      Serial.print (count, DEC); _space ();
+//      Serial.print (T, HEX); _space ();
+//      Serial.print (W, HEX); _space ();
     }
     if (count == 3) {
       W |= (T << 24);
-      count += 1;
+//      Serial.print (count, DEC); _space ();
+//      Serial.print (T, HEX); _space ();
+//      Serial.print (W, HEX); _space ();
     }
     if (count > 3) {
-      count += 1;
+//      Serial.print (count, DEC); _space ();
+//      Serial.print (T, HEX); _space ();
+//      Serial.print (W, HEX); _space ();
     }
   }  
 }
@@ -479,27 +513,27 @@ void setup() {
   CODE(35, _OVER)
   CODE(36, _EXIT)
 // @
-  NAME(37, 0, 1, '@', ' ', ' ')
+  NAME(37, 0, 1, '@', 0, 0)
   LINK(38, 33)
   CODE(39, _FETCH)
   CODE(40, _EXIT)
 // !
-  NAME(41, 0, 1, '!', ' ', ' ')
+  NAME(41, 0, 1, '!', 0, 0)
   LINK(42, 37)
   CODE(43, _STORE)
   CODE(44, _EXIT)
 // ,
-  NAME(45, 0, 1, ',', ' ', ' ')
+  NAME(45, 0, 1, ',', 0, 0)
   LINK(46, 41)
   CODE(47, _COMMA)
   CODE(48, _EXIT)
 // +
-  NAME(49, 0, 1, '+', ' ', ' ')
+  NAME(49, 0, 1, '+', 0, 0)
   LINK(50, 45)
   CODE(51, _PLUS)
   CODE(52, _EXIT)
 // -
-  NAME(53, 0, 1, '-', ' ', ' ')
+  NAME(53, 0, 1, '-', 0, 0)
   LINK(54, 49)
   CODE(55, _MINUS)
   CODE(56, _EXIT)
@@ -509,7 +543,7 @@ void setup() {
   CODE(59, _AND)
   CODE(60, _EXIT)
 // or 
-  NAME(61, 0, 2, 'o', 'r', ' ')
+  NAME(61, 0, 2, 'o', 'r', 0)
   LINK(62, 57)
   CODE(63, _OR)
   CODE(64, _EXIT)
@@ -534,22 +568,22 @@ void setup() {
   CODE(79, _NEGATE)
   CODE(80, _EXIT)
 // 2*
-  NAME(81, 0, 2, '2', '*', ' ')
+  NAME(81, 0, 2, '2', '*', 0)
   LINK(82, 77)
   CODE(83, _TWOSTAR)
   CODE(84, _EXIT)
 // 2/
-  NAME(85, 0, 2, '2', '/', ' ')
+  NAME(85, 0, 2, '2', '/', 0)
   LINK(86, 81)
   CODE(87, _TWOSLASH)
   CODE(88, _EXIT)
 // *
-  NAME(89, 0, 1, '*', ' ', ' ')
+  NAME(89, 0, 1, '*', 0, 0)
   LINK(90, 85)
   CODE(91, _TIMES)
   CODE(92, _EXIT)
 // /
-  NAME(93, 0, 1, '/', ' ', ' ')
+  NAME(93, 0, 1, '/', 0, 0)
   LINK(94, 89)
   CODE(95, _DIVIDE)
   CODE(96, _EXIT)
@@ -559,17 +593,17 @@ void setup() {
   CODE(99, _MOD)
   CODE(100, _EXIT)
 // */
-  NAME(101, 0, 2, '*', '/', ' ')
+  NAME(101, 0, 2, '*', '/', 0)
   LINK(102, 97)
   CODE(103, _STARSLASH)
   CODE(104, _EXIT)
 // 0=
-  NAME(105, 0, 2, '0', '=', ' ')
+  NAME(105, 0, 2, '0', '=', 0)
   LINK(106, 101)
   CODE(107, _ZEROEQUAL)
   CODE(108, _EXIT)
 // 0<
-  NAME(109, 0, 2, '0', '<', ' ')
+  NAME(109, 0, 2, '0', '<', 0)
   LINK(110, 105)
   CODE(111, _ZEROLESS)
   CODE(112, _EXIT)
@@ -579,66 +613,88 @@ void setup() {
   CODE(115, _SPACE)
   CODE(116, _EXIT)
 // cr
-  NAME(117, 0, 2, 'c', 'r', ' ')
+  NAME(117, 0, 2, 'c', 'r', 0)
   LINK(118, 113)
   CODE(119, _CR)
   CODE(120, _EXIT)
 // .
-  NAME(121, 0, 1, '.', ' ', ' ')
+  NAME(121, 0, 1, '.', 0, 0)
   LINK(122, 117)
   CODE(123, _DOT)
   CODE(124, _EXIT)
-// .s
-  NAME(125, 0, 2, '.', 's', ' ')
+// h.
+  NAME(125, 0, 2, 'h', '.', 0)
   LINK(126, 121)
-  CODE(127, _DOTS)
+  CODE(127, _HDOT)
   CODE(128, _EXIT)
-// words
-  NAME(129, 0, 5, 'w', 'o', 'r')
+// .s
+  NAME(129, 0, 2, '.', 's', 0)
   LINK(130, 125)
-  CODE(131, _WORDS)
+  CODE(131, _DOTS)
   CODE(132, _EXIT)
-// find
-  NAME(133, 0, 4, 'f', 'i', 'n')
+// words
+  NAME(133, 0, 5, 'w', 'o', 'r')
   LINK(134, 129)
-  CODE(135, _FIND)
+  CODE(135, _WORDS)
   CODE(136, _EXIT)
-// execute
-  NAME(137, 0, 7, 'e', 'x', 'e')
+// find
+  NAME(137, 0, 4, 'f', 'i', 'n')
   LINK(138, 133)
-  CODE(139, _EXECUTE)
+  CODE(139, _FIND)
   CODE(140, _EXIT)
-// word
-  NAME(141, 0, 4, 'w', 'o', 'r')
+// execute
+  NAME(141, 0, 7, 'e', 'x', 'e')
   LINK(142, 137)
-  CODE(143, _WORD)
+  CODE(143, _EXECUTE)
   CODE(144, _EXIT)
+// word
+  NAME(145, 0, 4, 'w', 'o', 'r')
+  LINK(146, 141)
+  CODE(147, _WORD)
+  CODE(148, _EXIT)
+// ?dup
+  NAME(149, 0, 4, 'w', 'o', 'r')
+  LINK(150, 145)
+  CODE(151, _WORD)
+  CODE(152, _EXIT)
 
-D = 141; // latest word
-H = 145; // top of dictionary
+D = 149; // latest word
+H = 153; // top of dictionary
 
 // test
-  M(200, 143) // word 
-  M(201, 135) // find
-  M(202, 23)  // dup 
+/*
+  M(200, _LIT)
+  M(201, 29)
+  M(202, _FETCH)
+  M(203, _HDOT)
+  M(204, _WORD)
+  M(205, _HDOT)
+  M(206, _CR)
+  M(207, _BRANCH)
+  M(208, 200)
+*/
+ 
+  M(200, 147) // word
+  M(201, 139) // find
+  M(202, _QDUP)
   M(203, _0BRANCH)
-  M(204, 207)
-  M(205, 23)  // dup
-  M(206, _DOT)
-  M(207, _DROP)
-  M(208, _LIT)
-  M(209, 'O')
-  M(210, _EMIT)
-  M(211, _LIT)
-  M(212, 'k')
-  M(213, _EMIT)
-  M(214, _CR)
-  M(215, _BRANCH)
-  M(216, 200)
+  M(204, 206)
+  M(205, _EXECUTE)
+  M(206, _LIT)
+  M(207, 'O')
+  M(208, _EMIT)
+  M(209, _LIT)
+  M(210, 'k')
+  M(211, _EMIT)
+  M(212, _CR)
+  M(213, _BRANCH)
+  M(214, 200)
+
 
   Serial.begin (9600);
   delay (5000);
   Serial.println ("myForth for Arm");
+  _words ();
 }
 
 // the loop function runs over and over again forever
