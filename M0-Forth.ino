@@ -89,6 +89,9 @@ void _here (void);
 void _dovar (void);
 void _create (void);
 void _allot (void);
+void _do (void);
+void _loop (void);
+void _i (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -192,8 +195,14 @@ void (*primitive []) (void) = {
 #define _DOVAR ~48
   _create,
 #define _CREATE ~49
-  _allot
+  _allot,
 #define _ALLOT ~50
+  _do,
+#define _DO ~51
+  _loop,
+#define _LOOP ~52
+  _i
+#define _I ~53
 };
 
 // primitive definitions
@@ -579,6 +588,31 @@ void _allot (void) {
   H += T;
 }
 
+void _do (void) {
+  T = memory [S++];
+  memory [--R] = T;
+  T = memory [S++];
+  memory [--R] = T;
+}
+
+void _loop (void) {
+  T = memory [R++];
+  W = memory [R++];
+  W += 1;
+  if (W == T) {
+    I += 1;
+    return;
+  }
+  memory [--R] = W;
+  memory [--R] = T;
+  I = memory [I];
+}
+
+void _i (void) {
+  W = memory [R + 1];
+  memory [--S] = W;
+}
+
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
 // and the initial dictionary
@@ -838,9 +872,22 @@ void setup() {
   LINK(205, 200)
   CODE(206, _ALLOT)
   CODE(207, _EXIT)
-
-  D = 204; // latest word
-  H = 208; // top of dictionary
+// test
+  NAME(208, 0, 4, 't', 'e', 's')
+  LINK(209, 204)
+  CODE(210, _LIT)
+  CODE(211, 10)
+  CODE(212, _LIT)
+  CODE(213, 0)
+  CODE(214, _DO)
+  CODE(215, _I)
+  CODE(216, _DOT)
+  CODE(217, _LOOP)
+  CODE(218, 215)
+  CODE(219, _EXIT)
+  
+  D = 208; // latest word
+  H = 220; // top of dictionary
 
   I = 173; // instruction pointer = abort
 
