@@ -82,6 +82,8 @@ void _initR (void);
 void _ok (void);
 void _dnum (void);
 void _hnum (void);
+void _dump (void);
+void _dotsh (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -149,7 +151,7 @@ void (*primitive []) (void) = {
 #define _CR ~30
   _space,
 #define _SPACE ~31
-  _twostar,
+  _zeroequal,
 #define _ZEROEQUAL ~32
   _zeroless,
 #define _ZEROLESS ~33
@@ -171,8 +173,12 @@ void (*primitive []) (void) = {
 #define _OK ~41
   _dnum,
 #define _DNUM ~42
-  _hnum
+  _hnum,
 #define _HNUM ~43
+  _dump,
+#define _DUMP ~44
+  _dotsh
+#define _DOTSH ~45
 };
 
 // primitive definitions
@@ -373,6 +379,18 @@ void _dotS (void) {
   }
 }
 
+void _dotsh (void) {
+  if (S == S0) {
+    Serial.print ("empty ");
+    return;
+  }
+  W = S0;
+  while (W > S) {
+    Serial.print (memory [--W], HEX);
+    Serial.write (' ');      
+  }
+}
+
 void _cr (void) {
   Serial.println (" ");
 }
@@ -468,18 +486,24 @@ void _ok (void) {
 }
 
 void _dnum (void) {
+  boolean sign = false;
   W = 0;
   while (1) {
     T = 0;
     while (Serial.available () == 0); 
     T = Serial.read ();
     if (T <= ' ') {
+      if (sign == true) W = -W;
       memory [--S] = W;
       return;
     }
-    W *= 10;
-    T -= '0';
-    W = (T + W);
+    if (T == '-') {
+      sign = true;
+    } else {
+      W *= 10;
+      T -= '0';
+      W = (T + W);
+    }
   }  
 }
 
@@ -500,6 +524,18 @@ void _hnum (void) {
   }  
 }
 
+void _dump (void) {
+  W = memory [S++];
+  Serial.print (W, HEX);
+  _space (); _space ();
+  for (int a = 0; a < 8; a++) {
+    T = memory [W++];
+    Serial.print (T, HEX);
+    _space ();
+  }
+  memory [--S] = W;
+}
+
 
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
@@ -508,11 +544,11 @@ void setup() {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
 // initialize dictionary
-  M(0, 0)
+
 // exit
-  NAME(4, 0, 4, 'e', 'x', 'i')
-  LINK(5, 1)
-  CODE(6, _EXIT)
+  NAME(10, 0, 4, 'e', 'x', 'i')
+  LINK(11, 0)
+  CODE(12, _EXIT)
 // key
   NAME(13, 0, 3, 'k', 'e', 'y')
   LINK(14, 10)
@@ -691,28 +727,35 @@ void setup() {
 // quit
   NAME(153, 0, 4, 'q', 'u', 'i')
   LINK(154, 149)
+  // begin begin
   CODE(155, _INITR)
+  // begin
   CODE(156, _WORD)
   CODE(157, _FIND)
   CODE(158, _QDUP)
+  // while (if)
   CODE(159, _0BRANCH)
   CODE(160, 165)
   CODE(161, _EXECUTE)
   CODE(162, _OK)
+  // repeat
   CODE(163, _BRANCH)
-  CODE(164, 156) // continue quit loop
+  CODE(164, 156)
+  // (then)
   CODE(165, _LIT)
   CODE(166, '?')
   CODE(167, _EMIT)
   CODE(168, _INITS)
+  // again
   CODE(169, _BRANCH)
   CODE(170, 155)
 // abort 
   NAME(171, 0, 5, 'a', 'b', 'o')
   LINK(172, 153)
   CODE(173, _INITS)
+  // again
   CODE(174, _BRANCH)
-  CODE(175, 155) // abort part of quit
+  CODE(175, 155)
 // d# 
   NAME(176, 0, 2, 'd', '#', 0)
   LINK(177, 171)
@@ -723,9 +766,19 @@ void setup() {
   LINK(181, 176)
   CODE(182, _HNUM)
   CODE(183, _EXIT)
+// dump 
+  NAME(184, 0, 4, 'd', 'u', 'm')
+  LINK(185, 180)
+  CODE(186, _DUMP)
+  CODE(187, _EXIT)
+// .sh 
+  NAME(188, 0, 3, '.', 's', 'h')
+  LINK(189, 184)
+  CODE(190, _DOTSH)
+  CODE(191, _EXIT)
 
-  D = 180; // latest word
-  H = 183; // top of dictionary
+  D = 188; // latest word
+  H = 192; // top of dictionary
 
   I = 173; // initialize instruction pointer
 
