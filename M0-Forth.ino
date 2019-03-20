@@ -77,6 +77,11 @@ void _execute (void);
 void _word (void);
 void _hdot (void);
 void _qdup (void);
+void _initS (void);
+void _initR (void);
+void _ok (void);
+void _dnum (void);
+void _hnum (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -156,8 +161,18 @@ void (*primitive []) (void) = {
 #define _EXECUTE ~36
   _word,
 #define _WORD ~37
-  _qdup
+  _qdup,
 #define _QDUP ~38
+  _initS,
+#define _INITS ~39
+  _initR,
+#define _INITR ~40
+  _ok,
+#define _OK ~41
+  _dnum,
+#define _DNUM ~42
+  _hnum
+#define _HNUM ~43
 };
 
 // primitive definitions
@@ -211,11 +226,9 @@ void _swap (void) {
 }
 
 void _over (void) {
-  int N = memory [S++];
   T = memory [S++];
   W = memory [S];
-  memory [S] = T;
-  memory [--S] = N;
+  memory [--S] = T;
   memory [--S] = W;
 }
 
@@ -425,37 +438,68 @@ void _word (void) {
     if (T <= ' ') {
       W |= count;
       memory [--S] = W;
-//      Serial.print (count, DEC); _space ();
-//      Serial.print (T, HEX); _space ();
-//      Serial.print (W, HEX); _cr ();
       return;
     }
     count += 1;
     if (count == 1) {
       W |= (T << 8);
-//      Serial.print (count, DEC); _space ();
-//      Serial.print (T, HEX); _space ();
-//      Serial.print (W, HEX); _space ();
     }
     if (count == 2) {
       W |= (T << 16);
-//      Serial.print (count, DEC); _space ();
-//      Serial.print (T, HEX); _space ();
-//      Serial.print (W, HEX); _space ();
     }
     if (count == 3) {
       W |= (T << 24);
-//      Serial.print (count, DEC); _space ();
-//      Serial.print (T, HEX); _space ();
-//      Serial.print (W, HEX); _space ();
     }
     if (count > 3) {
-//      Serial.print (count, DEC); _space ();
-//      Serial.print (T, HEX); _space ();
-//      Serial.print (W, HEX); _space ();
     }
   }  
 }
+
+void _initS (void) {
+  S = S0;
+}
+
+void _initR (void) {
+  R = R0;
+}
+
+void _ok (void) {
+  Serial.println (" Ok");
+}
+
+void _dnum (void) {
+  W = 0;
+  while (1) {
+    T = 0;
+    while (Serial.available () == 0); 
+    T = Serial.read ();
+    if (T <= ' ') {
+      memory [--S] = W;
+      return;
+    }
+    W *= 10;
+    T -= '0';
+    W = (T + W);
+  }  
+}
+
+void _hnum (void) {
+  W = 0;
+  while (1) {
+    T = 0;
+    while (Serial.available () == 0); 
+    T = Serial.read ();
+    if (T <= ' ') {
+      memory [--S] = W;
+      return;
+    }
+    W *= 16;
+    T -= '0';
+    if (T > 9) T -= 7;
+    W = (T + W);
+  }  
+}
+
 
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
@@ -463,25 +507,12 @@ void _word (void) {
 void setup() {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
-  I = 200; // initialize instruction pointer
 // initialize dictionary
   M(0, 0)
-// lit
-  NAME(1, 0, 3, 'l', 'i', 't')
-  LINK(2, 0)
-  CODE(3, _LIT)
 // exit
   NAME(4, 0, 4, 'e', 'x', 'i')
   LINK(5, 1)
   CODE(6, _EXIT)
-// branch
-  NAME(7, 0, 5, 'b', 'r', 'a')
-  LINK(8, 4)
-  CODE(9, _BRANCH)
-// 0branch
-  NAME(10, 0, 6, '0', 'b', 'r')
-  LINK(11, 7)
-  CODE(12, _0BRANCH)
 // key
   NAME(13, 0, 3, 'k', 'e', 'y')
   LINK(14, 10)
@@ -657,44 +688,51 @@ void setup() {
   LINK(150, 145)
   CODE(151, _WORD)
   CODE(152, _EXIT)
+// quit
+  NAME(153, 0, 4, 'q', 'u', 'i')
+  LINK(154, 149)
+  CODE(155, _INITR)
+  CODE(156, _WORD)
+  CODE(157, _FIND)
+  CODE(158, _QDUP)
+  CODE(159, _0BRANCH)
+  CODE(160, 165)
+  CODE(161, _EXECUTE)
+  CODE(162, _OK)
+  CODE(163, _BRANCH)
+  CODE(164, 156) // continue quit loop
+  CODE(165, _LIT)
+  CODE(166, '?')
+  CODE(167, _EMIT)
+  CODE(168, _INITS)
+  CODE(169, _BRANCH)
+  CODE(170, 155)
+// abort 
+  NAME(171, 0, 5, 'a', 'b', 'o')
+  LINK(172, 153)
+  CODE(173, _INITS)
+  CODE(174, _BRANCH)
+  CODE(175, 155) // abort part of quit
+// d# 
+  NAME(176, 0, 2, 'd', '#', 0)
+  LINK(177, 171)
+  CODE(178, _DNUM)
+  CODE(179, _EXIT)
+// h# 
+  NAME(180, 0, 2, 'h', '#', 0)
+  LINK(181, 176)
+  CODE(182, _HNUM)
+  CODE(183, _EXIT)
 
-D = 149; // latest word
-H = 153; // top of dictionary
+  D = 180; // latest word
+  H = 183; // top of dictionary
 
-// test
-/*
-  M(200, _LIT)
-  M(201, 29)
-  M(202, _FETCH)
-  M(203, _HDOT)
-  M(204, _WORD)
-  M(205, _HDOT)
-  M(206, _CR)
-  M(207, _BRANCH)
-  M(208, 200)
-*/
- 
-  M(200, 147) // word
-  M(201, 139) // find
-  M(202, _QDUP)
-  M(203, _0BRANCH)
-  M(204, 206)
-  M(205, _EXECUTE)
-  M(206, _LIT)
-  M(207, 'O')
-  M(208, _EMIT)
-  M(209, _LIT)
-  M(210, 'k')
-  M(211, _EMIT)
-  M(212, _CR)
-  M(213, _BRANCH)
-  M(214, 200)
-
+  I = 173; // initialize instruction pointer
 
   Serial.begin (9600);
-  delay (5000);
-  Serial.println ("myForth for Arm");
-  _words ();
+  delay (1000);
+  Serial.println ("myForth Arm");
+//  _words ();
 }
 
 // the loop function runs over and over again forever
