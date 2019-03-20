@@ -84,6 +84,11 @@ void _dnum (void);
 void _hnum (void);
 void _dump (void);
 void _dotsh (void);
+void _head (void);
+void _here (void);
+void _dovar (void);
+void _create (void);
+void _allot (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -177,8 +182,18 @@ void (*primitive []) (void) = {
 #define _HNUM ~43
   _dump,
 #define _DUMP ~44
-  _dotsh
+  _dotsh,
 #define _DOTSH ~45
+  _head,
+#define _HEAD ~46
+  _here,
+#define _HERE ~47
+  _dovar,
+#define _DOVAR ~48
+  _create,
+#define _CREATE ~49
+  _allot
+#define _ALLOT ~50
 };
 
 // primitive definitions
@@ -536,6 +551,33 @@ void _dump (void) {
   memory [--S] = W;
 }
 
+void _head (void) {
+  _word ();
+  _comma ();
+  memory [--S] = D;
+  _comma ();
+  D = H - 2;
+}
+
+void _here (void) {
+  memory [--S] = H;
+}
+
+void _dovar (void) {
+  memory [--S] = I;
+  _exit ();
+}
+
+void _create (void) {
+  _head ();
+  memory [--S] = _DOVAR;
+  _comma ();
+}
+
+void _allot (void) {
+  T = memory [S++];
+  H += T;
+}
 
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
@@ -776,11 +818,31 @@ void setup() {
   LINK(189, 184)
   CODE(190, _DOTSH)
   CODE(191, _EXIT)
+// head
+  NAME(192, 0, 4, 'h', 'e', 'a')
+  LINK(193, 188)
+  CODE(194, _HEAD)
+  CODE(195, _EXIT)
+// here
+  NAME(196, 0, 4, 'h', 'e', 'r')
+  LINK(197, 192)
+  CODE(198, _HERE)
+  CODE(199, _EXIT)
+// create 
+  NAME(200, 0, 6, 'c', 'r', 'e')
+  LINK(201, 196)
+  CODE(202, _CREATE)
+  CODE(203, _EXIT)
+// allot
+  NAME(204, 0, 5, 'a', 'l', 'l')
+  LINK(205, 200)
+  CODE(206, _ALLOT)
+  CODE(207, _EXIT)
 
-  D = 188; // latest word
-  H = 192; // top of dictionary
+  D = 204; // latest word
+  H = 208; // top of dictionary
 
-  I = 173; // initialize instruction pointer
+  I = 173; // instruction pointer = abort
 
   Serial.begin (9600);
   delay (1000);
