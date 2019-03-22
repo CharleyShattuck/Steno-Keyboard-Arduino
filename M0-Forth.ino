@@ -15,6 +15,7 @@
  
 // global variables
 int memory[RAM_SIZE]; // RAM is 32 bit word-addressed
+String tib = "";
 int S = S0; // data stack pointer
 int R = R0; // return stack pointer
 int I = 0; // instruction pointer
@@ -92,6 +93,8 @@ void _allot (void);
 void _do (void);
 void _loop (void);
 void _i (void);
+void _parse (void);
+void _showtib (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -201,8 +204,12 @@ void (*primitive []) (void) = {
 #define _DO ~51
   _loop,
 #define _LOOP ~52
-  _i
+  _i,
 #define _I ~53
+  _parse,
+#define _PARSE ~54
+  _showtib
+#define _SHOWTIB ~55
 };
 
 // primitive definitions
@@ -470,6 +477,7 @@ void _execute (void) {
   I = (T + 2);
  }
 
+/*
 void _word (void) {
   int count = 0;
   W = 0;
@@ -496,6 +504,7 @@ void _word (void) {
     }
   }  
 }
+*/
 
 void _initS (void) {
   S = S0;
@@ -610,6 +619,39 @@ void _loop (void) {
 
 void _i (void) {
   W = memory [R + 1];
+  memory [--S] = W;
+}
+
+void _parse (void) {
+  char t;
+  tib = "";
+  do {
+    while (!Serial.available ());
+    t = Serial.read ();
+    tib = tib + t;
+  } while (t > ' ');
+}
+
+void _showtib (void) {
+  T = tib.length ();
+  tib [T - 1] = 0;
+  Serial.print (tib);
+}
+
+void _word (void) {
+  char t; 
+  T = (tib.length () - 1);
+  W = T;
+  t = tib [0];
+  W |= (t << 8);
+  if (T > 1) {
+    t = tib [1];
+    W |= (t << 16);
+  }
+  if (T > 2) {
+    t = tib [2];
+    W |= (t << 24);
+  }
   memory [--S] = W;
 }
 
@@ -800,96 +842,95 @@ void setup() {
   LINK(150, 145)
   CODE(151, _WORD)
   CODE(152, _EXIT)
-// quit
-  NAME(153, 0, 4, 'q', 'u', 'i')
-  LINK(154, 149)
-  // begin begin
-  CODE(155, _INITR)
-  // begin
-  CODE(156, _WORD)
-  CODE(157, _FIND)
-  CODE(158, _QDUP)
-  // while (if)
-  CODE(159, _0BRANCH)
-  CODE(160, 165)
-  CODE(161, _EXECUTE)
-  CODE(162, _OK)
-  // repeat
-  CODE(163, _BRANCH)
-  CODE(164, 156)
-  // (then)
-  CODE(165, _LIT)
-  CODE(166, '?')
-  CODE(167, _EMIT)
-  CODE(168, _INITS)
-  // again
-  CODE(169, _BRANCH)
-  CODE(170, 155)
-// abort 
-  NAME(171, 0, 5, 'a', 'b', 'o')
-  LINK(172, 153)
-  CODE(173, _INITS)
-  // again
-  CODE(174, _BRANCH)
-  CODE(175, 155)
 // d# 
-  NAME(176, 0, 2, 'd', '#', 0)
-  LINK(177, 171)
-  CODE(178, _DNUM)
-  CODE(179, _EXIT)
+  NAME(153, 0, 2, 'd', '#', 0)
+  LINK(154, 149)
+  CODE(155, _DNUM)
+  CODE(156, _EXIT)
 // h# 
-  NAME(180, 0, 2, 'h', '#', 0)
-  LINK(181, 176)
-  CODE(182, _HNUM)
-  CODE(183, _EXIT)
+  NAME(157, 0, 2, 'h', '#', 0)
+  LINK(158, 153)
+  CODE(159, _HNUM)
+  CODE(160, _EXIT)
 // dump 
-  NAME(184, 0, 4, 'd', 'u', 'm')
-  LINK(185, 180)
-  CODE(186, _DUMP)
-  CODE(187, _EXIT)
+  NAME(161, 0, 4, 'd', 'u', 'm')
+  LINK(162, 157)
+  CODE(163, _DUMP)
+  CODE(164, _EXIT)
 // .sh 
-  NAME(188, 0, 3, '.', 's', 'h')
-  LINK(189, 184)
-  CODE(190, _DOTSH)
-  CODE(191, _EXIT)
+  NAME(165, 0, 3, '.', 's', 'h')
+  LINK(166, 161)
+  CODE(167, _DOTSH)
+  CODE(168, _EXIT)
 // head
-  NAME(192, 0, 4, 'h', 'e', 'a')
-  LINK(193, 188)
-  CODE(194, _HEAD)
-  CODE(195, _EXIT)
+  NAME(169, 0, 4, 'h', 'e', 'a')
+  LINK(170, 165)
+  CODE(171, _HEAD)
+  CODE(172, _EXIT)
 // here
-  NAME(196, 0, 4, 'h', 'e', 'r')
-  LINK(197, 192)
-  CODE(198, _HERE)
-  CODE(199, _EXIT)
+  NAME(173, 0, 4, 'h', 'e', 'r')
+  LINK(174, 169)
+  CODE(175, _HERE)
+  CODE(176, _EXIT)
 // create 
-  NAME(200, 0, 6, 'c', 'r', 'e')
-  LINK(201, 196)
-  CODE(202, _CREATE)
-  CODE(203, _EXIT)
+  NAME(177, 0, 6, 'c', 'r', 'e')
+  LINK(178, 173)
+  CODE(179, _CREATE)
+  CODE(180, _EXIT)
 // allot
-  NAME(204, 0, 5, 'a', 'l', 'l')
-  LINK(205, 200)
-  CODE(206, _ALLOT)
-  CODE(207, _EXIT)
-// test
-  NAME(208, 0, 4, 't', 'e', 's')
-  LINK(209, 204)
-  CODE(210, _LIT)
-  CODE(211, 10)
-  CODE(212, _LIT)
-  CODE(213, 0)
-  CODE(214, _DO)
-  CODE(215, _I)
-  CODE(216, _DOT)
-  CODE(217, _LOOP)
-  CODE(218, 215)
-  CODE(219, _EXIT)
-  
-  D = 208; // latest word
-  H = 220; // top of dictionary
+  NAME(181, 0, 5, 'a', 'l', 'l')
+  LINK(182, 177)
+  CODE(183, _ALLOT)
+  CODE(184, _EXIT)
+// quit
+  NAME(185, 0, 4, 'q', 'u', 'i')
+  LINK(186, 181)
+  // begin begin
+  CODE(187, _INITR)
+  // begin
+  CODE(188, _PARSE)
+  CODE(189, _WORD)
+  CODE(190, _FIND)
+  CODE(191, _QDUP)
+  // while (if)
+  CODE(192, _0BRANCH)
+  CODE(193, 198)
+  CODE(194, _EXECUTE)
+  CODE(195, _OK)
+  // repeat
+  CODE(196, _BRANCH)
+  CODE(197, 188)
+  // (then)
+  CODE(198, _SHOWTIB)
+  CODE(199, _LIT)
+  CODE(200, '?')
+  CODE(201, _EMIT)
+  CODE(202, _CR)
+  CODE(203, _INITS)
+  // again
+  CODE(204, _BRANCH)
+  CODE(205, 187)
+// abort 
+  NAME(206, 0, 5, 'a', 'b', 'o')
+  LINK(207, 185)
+  CODE(208, _INITS)
+  // again
+  CODE(209, _BRANCH)
+  CODE(210, 187)
 
-  I = 173; // instruction pointer = abort
+// test
+  NAME(211, 0, 4, 't', 'e', 's')
+  LINK(212, 206)
+  CODE(213, _PARSE)
+  CODE(214, _WORD)
+  CODE(215, _HDOT)
+  CODE(216, _EXIT)
+
+
+  D = 211; // latest word
+  H = 217; // top of dictionary
+
+  I = 208; // instruction pointer = abort
 
   Serial.begin (9600);
   delay (1000);
