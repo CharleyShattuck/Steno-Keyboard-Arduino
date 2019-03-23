@@ -97,6 +97,8 @@ void _i (void);
 void _parse (void);
 void _showtib (void);
 void _number (void);
+void _constant (void);
+void _doconst (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -212,8 +214,12 @@ void (*primitive []) (void) = {
 #define _PARSE ~54
   _showtib,
 #define _SHOWTIB ~55
-  _number
+  _number,
 #define _NUMBER ~56
+  _constant,
+#define _CONSTANT ~57
+  _doconst
+#define _DOCONST ~58
 };
 
 // primitive definitions
@@ -490,7 +496,7 @@ void _initR (void) {
 }
 
 void _ok (void) {
-  Serial.println (" Ok");
+  if (tib [tib.length () - 1] == 10) Serial.println (" Ok");
 }
 
 void _dnum (void) {
@@ -545,6 +551,7 @@ void _dump (void) {
 }
 
 void _head (void) {
+  _parse ();
   _word ();
   _comma ();
   memory [--S] = D;
@@ -564,6 +571,19 @@ void _dovar (void) {
 void _create (void) {
   _head ();
   memory [--S] = _DOVAR;
+  _comma ();
+}
+
+void _doconst (void) {
+  T = memory [I];
+  memory [--S] = T;
+  _exit ();
+}
+
+void _constant (void) {
+  _head ();
+  memory [--S] = _DOCONST;
+  _comma ();
   _comma ();
 }
 
@@ -925,19 +945,24 @@ void setup() {
   // again
   CODE(212, _BRANCH)
   CODE(213, 187)
+// constant
+  NAME(214, 0, 8, 'c', 'o', 'n')
+  LINK(215, 209)
+  CODE(216, _CONSTANT)
+  CODE(217, _EXIT)
 
 // test
-  NAME(214, 0, 4, 't', 'e', 's')
-  LINK(215, 209)
-  CODE(216, _PARSE)
-  CODE(217, _NUMBER)
-  CODE(218, _HDOT)
-  CODE(219, _DOT)
-  CODE(220, _EXIT)
+  NAME(218, 0, 4, 't', 'e', 's')
+  LINK(219, 214)
+  CODE(220, _PARSE)
+  CODE(221, _NUMBER)
+  CODE(222, _HDOT)
+  CODE(223, _DOT)
+  CODE(224, _EXIT)
 
 
-  D = 214; // latest word
-  H = 221; // top of dictionary
+  D = 218; // latest word
+  H = 225; // top of dictionary
 
   I = 211; // instruction pointer = abort
 
