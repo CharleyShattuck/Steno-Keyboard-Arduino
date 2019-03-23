@@ -99,6 +99,7 @@ void _showtib (void);
 void _number (void);
 void _constant (void);
 void _doconst (void);
+void _nop (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -218,8 +219,10 @@ void (*primitive []) (void) = {
 #define _NUMBER ~56
   _constant,
 #define _CONSTANT ~57
-  _doconst
+  _doconst,
 #define _DOCONST ~58
+  _nop
+#define _NOP ~59
 };
 
 // primitive definitions
@@ -680,6 +683,10 @@ void _number (void) {
   memory [--S] = 0;
 } 
 
+void _nop (void) {
+  return;
+}
+
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
 // and the initial dictionary
@@ -688,9 +695,15 @@ void setup() {
   R = R0; // initialize return stack
 // initialize dictionary
 
+// trailing space kludge
+  NAME(6, 0, 0, 10, 0, 0)
+  LINK(7, 0)
+  CODE(8, _NOP)
+  CODE(9, _EXIT)
+
 // exit
   NAME(10, 0, 4, 'e', 'x', 'i')
-  LINK(11, 0)
+  LINK(11, 6)
   CODE(12, _EXIT)
 // key
   NAME(13, 0, 3, 'k', 'e', 'y')
@@ -955,9 +968,10 @@ void setup() {
   NAME(218, 0, 4, 't', 'e', 's')
   LINK(219, 214)
   CODE(220, _PARSE)
-  CODE(221, _NUMBER)
+  CODE(221, _WORD)
   CODE(222, _HDOT)
-  CODE(223, _DOT)
+//  CODE(223, _DOT)
+  CODE(223, _EXIT)
   CODE(224, _EXIT)
 
 
