@@ -23,6 +23,7 @@ int W = 0; // working register
 int T = 0; // top of stack
 int H = 0; // dictionary pointer, HERE
 int D = 0; // dictionary list entry point
+int base = 10;
 
 /*  A word in the dictionary has these fields:
   link  32b  point to next word in list, 0 says end of list
@@ -95,6 +96,7 @@ void _loop (void);
 void _i (void);
 void _parse (void);
 void _showtib (void);
+void _number (void);
 
 // primitive function array
 void (*primitive []) (void) = {
@@ -208,8 +210,10 @@ void (*primitive []) (void) = {
 #define _I ~53
   _parse,
 #define _PARSE ~54
-  _showtib
+  _showtib,
 #define _SHOWTIB ~55
+  _number
+#define _NUMBER ~56
 };
 
 // primitive definitions
@@ -477,35 +481,6 @@ void _execute (void) {
   I = (T + 2);
  }
 
-/*
-void _word (void) {
-  int count = 0;
-  W = 0;
-  while (1) {
-    T = 0;
-    while (Serial.available () == 0); 
-    T = Serial.read ();
-    if (T <= ' ') {
-      W |= count;
-      memory [--S] = W;
-      return;
-    }
-    count += 1;
-    if (count == 1) {
-      W |= (T << 8);
-    }
-    if (count == 2) {
-      W |= (T << 16);
-    }
-    if (count == 3) {
-      W |= (T << 24);
-    }
-    if (count > 3) {
-    }
-  }  
-}
-*/
-
 void _initS (void) {
   S = S0;
 }
@@ -622,9 +597,15 @@ void _i (void) {
   memory [--S] = W;
 }
 
+// trim leading spaces
 void _parse (void) {
   char t;
   tib = "";
+  do {
+    while (!Serial.available ());
+    t = Serial.peek ();
+    if (t == ' ') t = Serial.read ();
+  } while (t == ' ');
   do {
     while (!Serial.available ());
     t = Serial.read ();
@@ -654,6 +635,30 @@ void _word (void) {
   }
   memory [--S] = W;
 }
+
+void _number (void) {
+  char t;
+  T = 0;
+  for (int i = 0; i < (tib.length () - 1); i++) {
+    if (i == 0) {
+      if (tib [i] == '-') continue;
+    }
+    t = tib [i];
+    if (!isDigit (t)) {
+      if (tib [0] == '-') T = ~T;
+      memory [--S] = T;
+      memory [--S] = -1;
+      return;
+    }
+    T *= base;
+    t -= '0';
+    if (t > 9) t -= 37;
+    T += t;
+  }
+  if (tib [0] == '-') T = -T;
+  memory [--S] = T;
+  memory [--S] = 0;
+} 
 
 // the setup function runs once when you press reset or power the board
 // This will setup stacks and other pointers, initial machine state
@@ -901,39 +906,43 @@ void setup() {
   CODE(196, _BRANCH)
   CODE(197, 188)
   // (then)
-  CODE(198, _SHOWTIB)
-  CODE(199, _LIT)
-  CODE(200, '?')
-  CODE(201, _EMIT)
-  CODE(202, _CR)
-  CODE(203, _INITS)
+  CODE(198, _NUMBER)
+  CODE(199, _0BRANCH)
+  CODE(200, 195)
+  CODE(201, _SHOWTIB)
+  CODE(202, _LIT)
+  CODE(203, '?')
+  CODE(204, _EMIT)
+  CODE(205, _CR)
+  CODE(206, _INITS)
   // again
-  CODE(204, _BRANCH)
-  CODE(205, 187)
+  CODE(207, _BRANCH)
+  CODE(208, 187)
 // abort 
-  NAME(206, 0, 5, 'a', 'b', 'o')
-  LINK(207, 185)
-  CODE(208, _INITS)
+  NAME(209, 0, 5, 'a', 'b', 'o')
+  LINK(210, 185)
+  CODE(211, _INITS)
   // again
-  CODE(209, _BRANCH)
-  CODE(210, 187)
+  CODE(212, _BRANCH)
+  CODE(213, 187)
 
 // test
-  NAME(211, 0, 4, 't', 'e', 's')
-  LINK(212, 206)
-  CODE(213, _PARSE)
-  CODE(214, _WORD)
-  CODE(215, _HDOT)
-  CODE(216, _EXIT)
+  NAME(214, 0, 4, 't', 'e', 's')
+  LINK(215, 209)
+  CODE(216, _PARSE)
+  CODE(217, _NUMBER)
+  CODE(218, _HDOT)
+  CODE(219, _DOT)
+  CODE(220, _EXIT)
 
 
-  D = 211; // latest word
-  H = 217; // top of dictionary
+  D = 214; // latest word
+  H = 221; // top of dictionary
 
-  I = 208; // instruction pointer = abort
+  I = 211; // instruction pointer = abort
 
   Serial.begin (9600);
-  delay (1000);
+  while (!Serial);
   Serial.println ("myForth Arm");
 //  _words ();
 }
