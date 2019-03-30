@@ -317,7 +317,7 @@ void _DDOTS (void) {
   }
   _DUP ();
   W = S0;
-  while (W > S) {
+  while (W > (S + 1)) {
     Serial.print (memory.data [--W]);
     Serial.write (' ');
   }
