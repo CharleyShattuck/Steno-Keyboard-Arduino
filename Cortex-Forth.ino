@@ -276,9 +276,14 @@ void _NUMBER (void) {
   memory.data [--S] = 0;
 }
 
+// void _EXECUTE (void) {
+//   memory.data [--R] = I;
+//   I = (T + 2);
+// }
 void _EXECUTE (void) {
-  memory.data [--R] = I;
-  I = (T + 2);
+  W = (T + 2);
+  _DROP ();
+  memory.program [W] ();
 }
 
 void _FIND (void) {
@@ -546,7 +551,7 @@ void setup () {
 
   // .
   NAME(115, 0, 1, '.', 0, 0)
-  LINK(116, 109)
+  LINK(116, 86)
   CODE(117, _DOT)
 #  define dot 117
   // .s
@@ -572,18 +577,19 @@ void setup () {
 
   // test
   LIST(200, parse)
-  LIST(201, number)
-  LIST(202, hdot)
-  LIST(203, hdot)
-  LIST(204, showtib)
-  LIST(205, branch)
-  LIST(206, 200)
+  LIST(201, wword)
+  LIST(202, find)
+  LIST(203, execute)
+//  LIST(203, ddots)
+//  LIST(204, showtib)
+  LIST(204, branch)
+  LIST(205, 200)
 
   D = 127; // latest word
   H = 130; // top of dictionary
 
-  I = abort; // instruction pointer = abort
-  //  I = 200; //  test
+  I = abort; // instruction pointer = abreort
+//  I = 200; //  test
   Serial.begin (9600);
   while (!Serial);
   Serial.println ("myForth Arm Cortex");
