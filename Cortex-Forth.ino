@@ -192,17 +192,6 @@ void _NEST (void) {
   I = (W + 1);
 }
 
-void _CREATE (void) {
-
-}
-
-void _CONSTANT (void) {
-
-}
-
-void _VARIABLE (void) {
-
-}
 
 void _DO (void) {
 
@@ -340,34 +329,26 @@ void _ZEROLESS () {
   T = 0;
 }
 
+void _DOTWORD () {
+  int Y = memory.data [W];
+  int X = (Y & 0xff);
+  Serial.write ('[');
+  Serial.print (X);
+  X = ((Y >> 8) & 0xff);
+  _DUP (); T = X; _EMIT ();
+  X = ((Y >> 16) & 0xff);
+  if (X != 0) { _DUP (); T = X; _EMIT (); }
+  X = ((Y >> 24) & 0xff);
+  if (X != 0) { _DUP (); T = X; _EMIT (); }
+  Serial.print ("] "); 
+}
+
 void _WORDS (void) {
-  int C = 0;
-  int X = 0;
-  int Y = 0;
   W = D;
   while (W) {
-    Y = memory.data [W];
-    C = (Y & 0xff);
-    X = ((Y >> 8) & 0xff);
-    _DUP (); T = X; _EMIT ();
-    X = ((Y >> 16) & 0xff);
-    if (X != 0) {
-      _DUP (); T = X; _EMIT ();
-    }
-    X = ((Y >> 24) & 0xff);
-    if (X != 0) {
-      _DUP (); T = X; _EMIT ();
-    }
-    C -= 4;
-    while (!(C < 0)) {
-      Serial.print ("_");
-      C -= 1;
-    }
-    _SPACE ();
+    _DOTWORD ();
     W = memory.data [++W];
   }
-  _CR ();
-//  _DROP ();
 }
 
 void _DEPTH (void) {
@@ -376,11 +357,41 @@ void _DEPTH (void) {
   T = W;
 }
 
+void _DUMP (void) {
+  int a = T;
+  _DROP ();
+  for (int i = 0; i < a; i++) {
+    W = T;
+    Serial.print (memory.data [T++], HEX);
+    Serial.write (' ');
+    _DOTWORD ();
+  }
+}
+
+void _HEAD (void) {
+  _PARSE ();
+  _WORD ();
+  _COMMA ();
+  memory.data [--S] = D;
+  _COMMA ();
+  D = H - 2;
+}
+
+void _CREATE (void) {
+
+}
+
+void _CONSTANT (void) {
+
+}
+
+void _VARIABLE (void) {
+
+}
+
 
 // do, loop
 // docol, doconst, dovar
-
-// inner interpreter
 
 void setup () {
 
@@ -408,8 +419,6 @@ void setup () {
 #  define ok 9
   // room to expand here
 
-  // words with dictionary links
-
   // trailing space kludge
   NAME(20, 0, 0, 10, 0, 0)
   LINK(21, 0)
@@ -418,11 +427,11 @@ void setup () {
   NAME(23, 0, 4, 'e', 'x', 'i')
   LINK(24, 20)
   CODE(25, _EXIT)
-  // key
+  // key ( - c)
   NAME(26, 0, 3, 'k', 'e', 'y')
   LINK(27, 23)
   CODE(28, _KEY)
-  // emit
+  // emit ( c - )
   NAME(29, 0, 4, 'e', 'm', 'i')
   LINK(30, 26)
   CODE(31, _EMIT)
@@ -432,72 +441,72 @@ void setup () {
   LINK(33, 29)
   CODE(34, _CR)
 #  define cr 34
-  // parse
+  // parse // leaves string in tib
   NAME(35, 0, 5, 'p', 'a', 'r')
   LINK(36, 32)
   CODE(37, _PARSE)
 #  define parse 37
-  // word
+  // word ( - n) gets string from tib
   NAME(38, 0, 4, 'w', 'o', 'r')
   LINK(39, 35)
   CODE(40, _WORD)
 #  define wword 40
-  // dup
+  // dup ( n - n n)
   NAME(41, 0, 3, 'd', 'u', 'p')
   LINK(42, 38)
   CODE(43, _DUP)
 #  define dup 43
-  // drop
+  // drop ( n - )
   NAME(44, 0, 4, 'd', 'r', 'o')
   LINK(45, 41)
   CODE(46, _DROP)
 #  define drop 46
-  // swap
+  // swap ( n1 n2 - n2 n1)
   NAME(47, 0, 4, 's', 'w', 'a')
   LINK(48, 44)
   CODE(49, _SWAP)
-  // over
+  // over ( n1 n2 - n1 n2 n1)
   NAME(50, 0, 4, 'o', 'v', 'e')
   LINK(51, 47)
   CODE(52, _OVER)
-  // @
+  // @ ( a - n)
   NAME(53, 0, 1, '@', 0, 0)
   LINK(54, 50)
   CODE(55, _FETCH)
-  // !
+  // ! ( n a - )
   NAME(56, 0, 1, '!', 0, 0)
   LINK(57, 53)
   CODE(58, _STORE)
-  // ,
+  // , ( n - )
   NAME(59, 0, 1, ',', 0, 0)
   LINK(60, 56)
   CODE(61, _COMMA)
-  // find
+  // find ( n - a)
   NAME(62, 0, 4, 'f', 'i', 'n')
   LINK(63, 59)
   CODE(64, _FIND)
 #  define find 64
-  // execute
+  // execute ( a)
   NAME(65, 0, 7, 'e', 'x', 'e')
   LINK(66, 62)
   CODE(67, _EXECUTE)
 #  define execute 67
-  // ?dup
+  // ?dup ( n - 0 | n n)
   NAME(68, 0, 3, '?', 'd', 'u')
   LINK(69, 65)
   CODE(70, _QDUP)
 #  define qdup 70
-  // number
+  // number ( - n -f) gets string from tib
   NAME(71, 0, 6, 'n', 'u', 'm')
   LINK(72, 68)
   CODE(73, _NUMBER)
 #  define number 73
-  // depth
+  // depth ( - n)
   NAME(74, 0, 5, 'd', 'e', 'p')
   LINK(75, 71)
   CODE(76, _DEPTH)
 #  define depth 76
-  // 0<
+  // 0< ( n - f)
   NAME(77, 0, 2, '0', '<', 0)
   LINK(78, 74)
   CODE(79, _ZEROLESS)
@@ -546,7 +555,7 @@ void setup () {
   DATA(115, branch)
   DATA(116, 90) // continue quit loop
 
-  // .
+  // . ( n - )
   NAME(117, 0, 1, '.', 0, 0)
   LINK(118, 86)
   CODE(119, _DOT)
@@ -566,54 +575,58 @@ void setup () {
   LINK(127, 123)
   CODE(128, _SPACE)
 #  define space 128
-  // h.
+  // h. ( n - )
   NAME(129, 0, 2, 'h', '.', 0)
   LINK(130, 126)
   CODE(131, _HDOT)
 #  define hdot 131
-  // +
+  // + ( n1 n2 - n3)
   NAME(132, 0, 1, '+', 0, 0)
   LINK(133, 129)
   CODE(134, _PLUS)
-  // -
+  // - ( n1 n2 - n3)
   NAME(135, 0, 1, '-', 0, 0)
   LINK(136, 132)
   CODE(137, _MINUS)
-  // and
+  // and (n1 n2 - n3)
   NAME(138, 0, 3, 'a', 'n', 'd')
   LINK(139, 135)
   CODE(140, _aND)
-  // or
+  // or ( n1 n2 - n3)
   NAME(141, 0, 2, 'o', 'r', 0)
   LINK(142, 138)
   CODE(143, _OR)
-  // xor
+  // xor ( n1 n2 - n3)
   NAME(144, 0, 3, 'x', 'o', 'r')
   LINK(145, 141)
   CODE(146, _XOR)
-  // invert
+  // invert ( n1 - n2)
   NAME(147, 0, 6, 'i', 'n', 'v')
   LINK(148, 144)
   CODE(149, _INVERT)
-  // abs
+  // abs ( n1 - n2)
   NAME(150, 0, 3, 'a', 'b', 's')
   LINK(151, 147)
   CODE(152, _ABS)
-  // negate
+  // negate ( n1 - n2)
   NAME(153, 0, 6, 'n', 'e', 'g')
   LINK(154, 150)
   CODE(155, _NEGATE)
-  // 2*
+  // 2* ( n1 - n2)
   NAME(156, 0, 2, '2', '*', 0)
   LINK(157, 153)
   CODE(158, _TWOSTAR)
-  // 2/
+  // 2/ ( n1 - n2)
   NAME(159, 0, 2, '2', '/', 0)
   LINK(160, 156)
   CODE(161, _TWOSLASH)
+  // dump ( a n - a+n) 
+  NAME(162, 0, 4, 'd', 'u', 'm')
+  LINK(163, 159)
+  CODE(164, _DUMP)
 
-  D = 159; // latest word
-  H = 162; // top of dictionary
+  D = 162; // latest word
+  H = 164; // top of dictionary
 
   // test
   DATA(200, parse)
@@ -636,9 +649,6 @@ void setup () {
   Serial.begin (9600);
   while (!Serial);
   Serial.println ("myForth Arm Cortex");
-  //  _WORDS ();
-  //  _DEPTH ();
-  //  _DDOTS ();
 }
 
 // the loop function runs over and over again forever
