@@ -221,6 +221,7 @@ void _PARSE (void) {
     t = Serial.read ();
     tib = tib + t;
   } while (t > ' ');
+  Serial.print (tib);
 }
 
 void _WORD (void) {
@@ -334,6 +335,7 @@ void _DOTWORD () {
   int X = (Y & 0xff);
   Serial.write ('[');
   Serial.print (X);
+  Serial.write (' ');
   X = ((Y >> 8) & 0xff);
   _DUP (); T = X; _EMIT ();
   X = ((Y >> 16) & 0xff);
@@ -344,11 +346,14 @@ void _DOTWORD () {
 }
 
 void _WORDS (void) {
+  int i = 0;
   W = D;
-  while (W) {
+  do {
     _DOTWORD ();
     W = memory.data [++W];
-  }
+    i += 1;
+    if ((i % 8) == 0) _CR ();
+  } while (memory.data [W + 1]);
 }
 
 void _DEPTH (void) {
@@ -368,27 +373,64 @@ void _DUMP (void) {
   }
 }
 
+void _HERE (void) {
+  _DUP ();
+  T = H;
+}
+
+void _ALLOT (void) {
+  H += T;
+  _DROP ();
+}
+
 void _HEAD (void) {
   _PARSE ();
   _WORD ();
   _COMMA ();
-  memory.data [--S] = D;
+  _DUP ();
+  T = D;
   _COMMA ();
   D = H - 2;
 }
 
-void _CREATE (void) {
+void _DOVAR (void) {
+  _DUP ();
+  T = (W + 1);
+}
 
+void _CREATE (void) {
+  _HEAD ();
+  _DUP ();
+  _DUP ();
+  memory.program [S] = _DOVAR;
+  _DROP ();
+  _COMMA ();
+}
+
+void _DOCONST (void) {
+  _DUP ();
+  T = memory.data [W + 1];
 }
 
 void _CONSTANT (void) {
-
+  _HEAD ();
+  _DUP ();
+  _DUP ();
+  memory.program [S] = _DOCONST;
+  _DROP ();
+  _COMMA ();
+  _COMMA ();
 }
 
 void _VARIABLE (void) {
-
+  _CREATE ();
+  H += 1;
 }
 
+void _QUESTION (void) {
+  _FETCH ();
+  _DOT ();
+}
 
 // do, loop
 // docol, doconst, dovar
@@ -624,9 +666,34 @@ void setup () {
   NAME(162, 0, 4, 'd', 'u', 'm')
   LINK(163, 159)
   CODE(164, _DUMP)
+  // create
+  NAME(165, 0, 6, 'c', 'r', 'e')
+  LINK(166, 162)
+  CODE(167, _CREATE)
+  // here 
+  NAME(168, 0, 4, 'h', 'e', 'r')
+  LINK(169, 165)
+  CODE(170, _HERE)
+  // allot 
+  NAME(171, 0, 5, 'a', 'l', 'l')
+  LINK(172, 168)
+  CODE(173, _ALLOT)
+  // variable 
+  NAME(174, 0, 8, 'v', 'a', 'r')
+  LINK(175, 171)
+  CODE(176, _VARIABLE)
+  // ?
+  NAME(177, 0, 1, '?', 0, 0)
+  LINK(178, 174)
+  CODE(179, _QUESTION)
+  // constant
+  NAME(180, 0, 8, 'c', 'o', 'n')
+  LINK(181, 177)
+  CODE(182, _CONSTANT)
 
-  D = 162; // latest word
-  H = 164; // top of dictionary
+
+  D = 180; // latest word
+  H = 183; // top of dictionary
 
   // test
   DATA(200, parse)
