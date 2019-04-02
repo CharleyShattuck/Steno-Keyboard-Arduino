@@ -432,6 +432,11 @@ void _QUESTION (void) {
   _DOT ();
 }
 
+void _R (void) {
+  _DUP ();
+  T = R;
+}
+
 // do, loop
 // docol, doconst, dovar
 
@@ -469,6 +474,7 @@ void setup () {
   NAME(23, 0, 4, 'e', 'x', 'i')
   LINK(24, 20)
   CODE(25, _EXIT)
+#  define exit 25
   // key ( - c)
   NAME(26, 0, 3, 'k', 'e', 'y')
   LINK(27, 23)
@@ -690,10 +696,20 @@ void setup () {
   NAME(180, 0, 8, 'c', 'o', 'n')
   LINK(181, 177)
   CODE(182, _CONSTANT)
+  // R
+  NAME(183, 0, 1, 'R', 0, 0)
+  LINK(184, 180)
+  CODE(185, _R)
+  // test
+  NAME(186, 0, 4, 't', 'e', 's')
+  LINK(187, 183)
+  CODE(188, _NEST)
+  DATA(189, ddots)
+  DATA(190, exit)
 
 
-  D = 180; // latest word
-  H = 183; // top of dictionary
+  D = 186; // latest word
+  H = 190; // top of dictionary
 
   // test
   DATA(200, parse)
