@@ -12,6 +12,7 @@
 #define LINK(m, a) {memory.data [m] = a;}
 #define CODE(m, a) {memory.program [m] = a;}
 #define DATA(m, a) {memory.data [m] = a;}
+#define IMMED 0x80
 
 // global variables
 union Memory {
@@ -28,6 +29,7 @@ int T = 0; // top of stack
 int H = 0; // dictionary pointer, HERE
 int D = 0; // dictionary list entry point
 int base = 10;
+boolean state = false; // compiling or not
 
 /*  A word in the dictionary has these fields:
   name  32b word,  a 32 bit int, made up of byte count and three letters
@@ -42,6 +44,13 @@ int base = 10;
 
 // primitive definitions
 
+void _LBRAC (void) {
+  state = false; // interpreting
+}
+
+void _RBRAC (void) {
+  state = true; // compiling
+}
 
 void _NOP (void) {
   return;
@@ -267,6 +276,13 @@ void _NUMBER (void) {
 }
 
 void _EXECUTE (void) {
+  if (state == true) {
+    if (((memory.data [T]) & 0x80) == 0) {
+      T += 2;
+      _COMMA ();
+      return;
+    }
+  }
   W = (T + 2);
   _DROP ();
   memory.program [W] ();
@@ -277,7 +293,7 @@ void _FIND (void) {
   T = D;
   while (T != 0) {
     W = (memory.data [T]);
-    if (W == X) {
+    if ((W & 0xffffff7f) == X) {
       return;
     }
     T = memory.data [T + 1];
@@ -700,35 +716,19 @@ void setup () {
   NAME(183, 0, 1, 'R', 0, 0)
   LINK(184, 180)
   CODE(185, _R)
-  // test
-  NAME(186, 0, 4, 't', 'e', 's')
+  // [ 
+  NAME(186, IMMED, 1, '[', 0, 0)
   LINK(187, 183)
-  CODE(188, _NEST)
-  DATA(189, ddots)
-  DATA(190, exit)
+  CODE(188, _LBRAC)
+  // ]
+  NAME(189, 0, 1, ']', 0, 0)
+  LINK(190, 186)
+  CODE(191, _RBRAC)
 
-
-  D = 186; // latest word
-  H = 190; // top of dictionary
-
-  // test
-  DATA(200, parse)
-  DATA(201, wword)
-  DATA(202, find)
-  DATA(203, dot)
-  DATA(204, number)
-  DATA(205, dot)
-  DATA(206, dot)
-//  DATA(201, wword)
-//  DATA(202, find)
-//  DATA(203, execute)
-  DATA(207, ddots)
-  DATA(208, showtib)
-  DATA(209, branch)
-  DATA(210, 200)
+  D = 189; // latest word
+  H = 192; // top of dictionary
 
   I = abort; // instruction pointer = abort
-//  I = 200; //  test
   Serial.begin (9600);
   while (!Serial);
   Serial.println ("myForth Arm Cortex");
