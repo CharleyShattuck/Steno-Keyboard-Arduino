@@ -260,7 +260,7 @@ void _NUMBER (void) {
     }
     t = tib [i];
     if (!isDigit (t)) {
-      if (tib [0] == '-') T = -T;
+    if (tib [0] == '-') T = -T;
       _DUP ();
       T = -1;
       return;
@@ -271,6 +271,13 @@ void _NUMBER (void) {
     T += t;
   }
   if (tib [0] == '-') T = -T;
+      if (state == true) {
+        _DUP ();
+        T = 1; // forward reference to lit
+        _COMMA (); // lit
+        _COMMA (); // the number
+        return;
+      }
   _DUP ();
   T = 0;
 }
@@ -421,6 +428,23 @@ void _CREATE (void) {
   memory.program [S] = _DOVAR;
   _DROP ();
   _COMMA ();
+}
+
+void _COLON (void) {
+  _HEAD ();
+  _DUP ();
+  _DUP ();
+  memory.program [S] = _NEST;
+  _DROP ();
+  _COMMA ();
+  _RBRAC ();
+}
+
+void _SEMI (void) {
+  _DUP ();
+  T = 25; // forward reference to exit 
+  _COMMA (); // exit
+  _LBRAC (); // stop compiling
 }
 
 void _DOCONST (void) {
@@ -724,9 +748,17 @@ void setup () {
   NAME(189, 0, 1, ']', 0, 0)
   LINK(190, 186)
   CODE(191, _RBRAC)
+  // :
+  NAME(192, 0, 1, ':', 0, 0)
+  LINK(193, 189)
+  CODE(194, _COLON)
+  // ;
+  NAME(195, IMMED, 1, ';', 0, 0)
+  LINK(196, 192)
+  CODE(197, _SEMI)
 
-  D = 189; // latest word
-  H = 192; // top of dictionary
+  D = 195; // latest word
+  H = 198; // top of dictionary
 
   I = abort; // instruction pointer = abort
   Serial.begin (9600);
