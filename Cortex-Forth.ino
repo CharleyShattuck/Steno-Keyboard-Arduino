@@ -276,7 +276,6 @@ void _NUMBER (void) {
         T = 1; // forward reference to lit
         _COMMA (); // lit
         _COMMA (); // the number
-        return;
       }
   _DUP ();
   T = 0;
@@ -443,7 +442,7 @@ void _COLON (void) {
 void _SEMI (void) {
   _DUP ();
   T = 25; // forward reference to exit 
-  _COMMA (); // exit
+  _COMMA (); // compile exit
   _LBRAC (); // stop compiling
 }
 
@@ -631,6 +630,7 @@ void setup () {
   DATA(103, number)
   DATA(104, zbranch)
   DATA(105, 114) // to ok
+
   DATA(106, showtib)
   DATA(107, lit)
   DATA(108, '?')
