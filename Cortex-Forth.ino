@@ -491,6 +491,20 @@ void _I (void) {
   T = memory.data [R + 1];
 }
 
+void _CDO (void) {
+  _DUP ();
+  T = 4; // forward reference to ddo
+  _COMMA ();
+  _DUP ();
+  T = H;
+}
+
+void _CLOOP (void) {
+  _DUP ();
+  T = 5; // forward reference to lloop
+  _COMMA ();
+  _COMMA (); // address left on stack by do
+}
 
 void setup () {
 
@@ -771,17 +785,17 @@ void setup () {
   LINK(196, 192)
   CODE(197, _SEMI)
   // i 
-  NAME(198, IMMED, 1, 'i', 0, 0)
+  NAME(198, 0, 1, 'i', 0, 0)
   LINK(199, 195)
   CODE(200, _I)
   // do
-//  NAME(198, IMMED, 2, 'd', 'o', 0)
-//  LINK(199, 195)
-//  CODE(200, _DO)
+  NAME(201, IMMED, 2, 'd', 'o', 0)
+  LINK(202, 198)
+  CODE(203, _CDO)
   // loop 
-//  NAME(201, IMMED, 4, 'l', 'o', 'o')
-//  LINK(202, 198)
-//  CODE(203, _LOOP)
+  NAME(204, IMMED, 4, 'l', 'o', 'o')
+  LINK(205, 201)
+  CODE(206, _CLOOP)
 
 // test
   DATA(300, lit)
@@ -802,11 +816,11 @@ void setup () {
 
 
 
-  D = 198; // latest word
-  H = 201; // top of dictionary
+  D = 204; // latest word
+  H = 207; // top of dictionary
 
-  I = 300; // test
-//  I = abort; // instruction pointer = abort
+//  I = 300; // test
+  I = abort; // instruction pointer = abort
   Serial.begin (9600);
   while (!Serial);
   Serial.println ("myForth Arm Cortex");
@@ -816,7 +830,7 @@ void setup () {
 void loop() {
   W = memory.data [I++];
   memory.program [W] ();
-  delay (300);
+//  delay (300);
 }
 
 
