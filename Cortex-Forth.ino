@@ -201,15 +201,6 @@ void _NEST (void) {
   I = (W + 1);
 }
 
-
-void _DO (void) {
-
-}
-
-void _LOOP (void) {
-
-}
-
 void _SHOWTIB (void) {
   W = tib.length ();
   tib [W - 1] = 0;
@@ -476,8 +467,30 @@ void _R (void) {
   T = R;
 }
 
-// do, loop
-// docol, doconst, dovar
+void _DO (void) {
+  memory.data [--R] = T;
+  _DROP ();
+  memory.data [--R] = T;
+  _DROP ();
+}
+
+void _LOOP (void) {
+  int X = memory.data [R++];
+  W = (memory.data [R++] + 1);
+  if (W == X) {
+    I += 1;
+    return;
+  }
+  memory.data [--R] = (W);
+  memory.data [--R] = X;
+  I = memory.data [I];
+}
+
+void _I (void) {
+  _DUP ();
+  T = memory.data [R + 1];
+}
+
 
 void setup () {
 
@@ -493,8 +506,10 @@ void setup () {
 #  define branch 2
   CODE(3, _0BRANCH)
 #  define zbranch 3
-  //  CODE(4, _DO)
-  //  CODE(5, _LOOP)
+  CODE(4, _DO)
+#  define ddo 4
+  CODE(5, _LOOP)
+#  define lloop 5
   CODE(6, _INITR)
 #  define initr 6
   CODE(7, _INITS)
@@ -630,7 +645,6 @@ void setup () {
   DATA(103, number)
   DATA(104, zbranch)
   DATA(105, 114) // to ok
-
   DATA(106, showtib)
   DATA(107, lit)
   DATA(108, '?')
@@ -756,11 +770,43 @@ void setup () {
   NAME(195, IMMED, 1, ';', 0, 0)
   LINK(196, 192)
   CODE(197, _SEMI)
+  // i 
+  NAME(198, IMMED, 1, 'i', 0, 0)
+  LINK(199, 195)
+  CODE(200, _I)
+  // do
+//  NAME(198, IMMED, 2, 'd', 'o', 0)
+//  LINK(199, 195)
+//  CODE(200, _DO)
+  // loop 
+//  NAME(201, IMMED, 4, 'l', 'o', 'o')
+//  LINK(202, 198)
+//  CODE(203, _LOOP)
 
-  D = 195; // latest word
-  H = 198; // top of dictionary
+// test
+  DATA(300, lit)
+  DATA(301, 10) // i
+  DATA(302, lit)
+  DATA(303, 0) // i
+  DATA(304, ddo)
+  DATA(305, 200) // i
+  DATA(306, dot)
+  DATA(307, lloop)
+  DATA(308, 305)
+  DATA(309, 185) // R
+  DATA(310, dot)
+  DATA(311, ddots)
+  DATA(312, cr)
+  DATA(313, branch)
+  DATA(314, 300)
 
-  I = abort; // instruction pointer = abort
+
+
+  D = 198; // latest word
+  H = 201; // top of dictionary
+
+  I = 300; // test
+//  I = abort; // instruction pointer = abort
   Serial.begin (9600);
   while (!Serial);
   Serial.println ("myForth Arm Cortex");
@@ -770,7 +816,7 @@ void setup () {
 void loop() {
   W = memory.data [I++];
   memory.program [W] ();
-  //  delay (300);
+  delay (300);
 }
 
 
