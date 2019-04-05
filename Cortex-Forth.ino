@@ -518,6 +518,13 @@ void _CUNTIL (void) {
   _COMMA (); // address left on stack by begin
 }
 
+void _CAGAIN (void) {
+  _DUP ();
+  T = 2; // forward reference to branch
+  _COMMA ();
+  _COMMA (); // address left on stack by begin
+}
+
 void _CIF (void) {
   _DUP ();
   T = 3; // forward reference to 0branch
@@ -529,11 +536,21 @@ void _CIF (void) {
   _COMMA (); // dummy in address field
 }
 
+void _CWHILE (void) {
+  _CIF ();
+  _SWAP ();
+}
+
 void _CTHEN (void) {
   _DUP ();
   T = H;
   _SWAP ();
   _STORE ();
+}
+
+void _CREPEAT (void) {
+  _CAGAIN ();
+  _CTHEN ();
 }
 
 void _CELSE (void) {
@@ -881,8 +898,21 @@ void setup () {
   NAME(225, 0, 1, '\'', 0, 0)
   LINK(226, 222)
   CODE(227, _TICK)
+  // again
+  NAME(228, IMMED, 5, 'a', 'g', 'a')
+  LINK(229, 225)
+  CODE(230, _CAGAIN)
+  // while
+  NAME(231, IMMED, 5, 'w', 'h', 'i')
+  LINK(232, 228)
+  CODE(233, _CWHILE)  
+  // repeat
+  NAME(234, IMMED, 6, 'r', 'e', 'p')
+  LINK(235, 231)
+  CODE(236, _CREPEAT)
 
-// test
+
+  // test
   DATA(300, lit)
   DATA(301, 10) // i
   DATA(302, lit)
@@ -901,8 +931,8 @@ void setup () {
 
 
 
-  D = 225; // latest word
-  H = 227; // top of dictionary
+  D = 234; // latest word
+  H = 237; // top of dictionary
 
 //  I = 300; // test
   I = abort; // instruction pointer = abort
