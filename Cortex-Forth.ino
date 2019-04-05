@@ -581,6 +581,13 @@ void _TICK (void) {
   _FIND ();
 }
 
+void _CLITERAL (void) {
+  _DUP ();
+  T = 1; // forward reference to lit
+  _COMMA ();
+  _COMMA (); // the number that was already on the stack
+}
+
 void setup () {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
@@ -910,7 +917,10 @@ void setup () {
   NAME(234, IMMED, 6, 'r', 'e', 'p')
   LINK(235, 231)
   CODE(236, _CREPEAT)
-
+  // literal 
+  NAME(237, IMMED, 7, 'l', 'i', 't')
+  LINK(238, 234)
+  CODE(239, _CLITERAL)
 
   // test
   DATA(300, lit)
@@ -931,8 +941,8 @@ void setup () {
 
 
 
-  D = 234; // latest word
-  H = 237; // top of dictionary
+  D = 237; // latest word
+  H = 240; // top of dictionary
 
 //  I = 300; // test
   I = abort; // instruction pointer = abort
