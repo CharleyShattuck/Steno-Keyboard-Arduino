@@ -536,6 +536,33 @@ void _CTHEN (void) {
   _STORE ();
 }
 
+void _CELSE (void) {
+  _DUP ();
+  T = 2; // forward reference to branch
+  _COMMA ();
+  _DUP ();
+  T = H; // address that needs patching later
+  _DUP ();
+  T = 0;
+  _COMMA (); // dummy in address field
+  _SWAP ();
+  _CTHEN ();
+}
+
+void _FORGET (void) {
+  _PARSE ();
+  _WORD ();
+  _FIND ();
+  D = memory.data [T + 1];
+  H = T;
+  _DROP ();
+}
+
+void _TICK (void) {
+  _PARSE ();
+  _WORD ();
+  _FIND ();
+}
 
 void setup () {
   S = S0; // initialize data stack
@@ -842,7 +869,18 @@ void setup () {
   NAME(216, IMMED, 4, 't', 'h', 'e')
   LINK(217, 213)
   CODE(218, _CTHEN)
-
+  // else
+  NAME(219, IMMED, 4, 'e', 'l', 's')
+  LINK(220, 216)
+  CODE(221, _CELSE)
+  // forget
+  NAME(222, 0, 6, 'f', 'o', 'r')
+  LINK(223, 219)
+  CODE(224, _FORGET)
+  // '
+  NAME(225, 0, 1, '\'', 0, 0)
+  LINK(226, 222)
+  CODE(227, _TICK)
 
 // test
   DATA(300, lit)
@@ -863,8 +901,8 @@ void setup () {
 
 
 
-  D = 216; // latest word
-  H = 219; // top of dictionary
+  D = 225; // latest word
+  H = 227; // top of dictionary
 
 //  I = 300; // test
   I = abort; // instruction pointer = abort
