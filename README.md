@@ -12,3 +12,5 @@ A new addition is a tiny version of Jackdaw, an orthographic chording system for
 Interpreter.ino: Unrelated project. A Forth style interpreter.
 
 Also M0-Forth is a Forth in C for an Arm Arduino, in development.
+
+M0-Forth is now an abandoned first try. Cortex-Forth is simpler and more efficient. Also, I think, easier to explain.
