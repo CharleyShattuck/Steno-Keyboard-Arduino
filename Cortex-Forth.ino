@@ -506,8 +506,19 @@ void _CLOOP (void) {
   _COMMA (); // address left on stack by do
 }
 
-void setup () {
+void _CBEGIN (void) {
+  _DUP ();
+  T = H;
+}
 
+void _CUNTIL (void) {
+  _DUP ();
+  T = 3; // forward reference to Obranch
+  _COMMA ();
+  _COMMA (); // address left on stack by begin
+}
+
+void setup () {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
 
@@ -796,6 +807,15 @@ void setup () {
   NAME(204, IMMED, 4, 'l', 'o', 'o')
   LINK(205, 201)
   CODE(206, _CLOOP)
+  // begin 
+  NAME(207, IMMED, 5, 'b', 'e', 'g')
+  LINK(208, 204)
+  CODE(209, _CBEGIN)
+  // until 
+  NAME(210, IMMED, 5, 'u', 'n', 't')
+  LINK(211, 207)
+  CODE(212, _CUNTIL)
+
 
 // test
   DATA(300, lit)
@@ -816,8 +836,8 @@ void setup () {
 
 
 
-  D = 204; // latest word
-  H = 207; // top of dictionary
+  D = 210; // latest word
+  H = 213; // top of dictionary
 
 //  I = 300; // test
   I = abort; // instruction pointer = abort
