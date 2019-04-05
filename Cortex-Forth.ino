@@ -518,6 +518,25 @@ void _CUNTIL (void) {
   _COMMA (); // address left on stack by begin
 }
 
+void _CIF (void) {
+  _DUP ();
+  T = 3; // forward reference to 0branch
+  _COMMA ();
+  _DUP ();
+  T = H; // address that needs patching later
+  _DUP ();
+  T = 0;
+  _COMMA (); // dummy in address field
+}
+
+void _CTHEN (void) {
+  _DUP ();
+  T = H;
+  _SWAP ();
+  _STORE ();
+}
+
+
 void setup () {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
@@ -815,6 +834,14 @@ void setup () {
   NAME(210, IMMED, 5, 'u', 'n', 't')
   LINK(211, 207)
   CODE(212, _CUNTIL)
+  // if
+  NAME(213, IMMED, 2, 'i', 'f', 0)
+  LINK(214, 210)
+  CODE(215, _CIF)
+  // then
+  NAME(216, IMMED, 4, 't', 'h', 'e')
+  LINK(217, 213)
+  CODE(218, _CTHEN)
 
 
 // test
@@ -836,8 +863,8 @@ void setup () {
 
 
 
-  D = 210; // latest word
-  H = 213; // top of dictionary
+  D = 216; // latest word
+  H = 219; // top of dictionary
 
 //  I = 300; // test
   I = abort; // instruction pointer = abort
