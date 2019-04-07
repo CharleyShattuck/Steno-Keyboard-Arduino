@@ -5,7 +5,7 @@
 
 */
 
-#define RAM_SIZE 0x1000
+#define RAM_SIZE 0x1200
 #define S0 0x1000
 #define R0 0x0f00
 #define NAME(m, f, c, x, y, z) {memory.data [m] = f + c + (x << 8) + (y << 16) + (z << 24);}
@@ -76,6 +76,7 @@ void _KEY (void) {
   _DUP ();
   while (!Serial.available ());
   T = Serial.read ();
+//  Serial.write (T);
 }
 
 void _EMIT (void) {
@@ -214,11 +215,15 @@ void _PARSE (void) {
   do {
     while (!Serial.available ());
     t = Serial.peek ();
-    if (t == ' ') t = Serial.read ();
+    if (t == ' ') {
+      t = Serial.read ();
+//      Serial.write (t);
+    }
   } while (t == ' ');
   do {
     while (!Serial.available ());
     t = Serial.read ();
+//    Serial.write (t);
     tib = tib + t;
   } while (t > ' ');
   Serial.print (tib);
@@ -588,6 +593,23 @@ void _CLITERAL (void) {
   _COMMA (); // the number that was already on the stack
 }
 
+void _CFETCH (void) {
+  W = (T % 4);
+  T = memory.data [T / 4];
+  T = (T >> (W * 8) & 0xff);
+} 
+
+void _CSTORE (void) {
+  int X = (T / 4);
+  W = (T % 4);
+  _DROP ();
+  T = (T << (W * 8));
+  T = (T | (memory.data [X] & ~(0xff << (W * 8))));
+  memory.data [X] = T;
+  _DROP ();
+} 
+
+
 void setup () {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
@@ -921,6 +943,14 @@ void setup () {
   NAME(237, IMMED, 7, 'l', 'i', 't')
   LINK(238, 234)
   CODE(239, _CLITERAL)
+  // c@ ( b - c) 
+  NAME(240, 0, 2, 'c', '@', 0)
+  LINK(241, 237)
+  CODE(242, _CFETCH)
+  // c! ( c b - ) 
+  NAME(243, 0, 2, 'c', '!', 0)
+  LINK(244, 240)
+  CODE(245, _CSTORE)
 
   // test
   DATA(300, lit)
@@ -941,8 +971,8 @@ void setup () {
 
 
 
-  D = 237; // latest word
-  H = 240; // top of dictionary
+  D = 243; // latest word
+  H = 246; // top of dictionary
 
 //  I = 300; // test
   I = abort; // instruction pointer = abort
