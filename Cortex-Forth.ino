@@ -610,6 +610,7 @@ void _CSTORE (void) {
 } 
 
 
+
 void setup () {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
@@ -684,10 +685,12 @@ void setup () {
   NAME(47, 0, 4, 's', 'w', 'a')
   LINK(48, 44)
   CODE(49, _SWAP)
+#  define swap 49
   // over ( n1 n2 - n1 n2 n1)
   NAME(50, 0, 4, 'o', 'v', 'e')
   LINK(51, 47)
   CODE(52, _OVER)
+#  define over 52
   // @ ( a - n)
   NAME(53, 0, 1, '@', 0, 0)
   LINK(54, 50)
@@ -803,6 +806,7 @@ void setup () {
   NAME(132, 0, 1, '+', 0, 0)
   LINK(133, 129)
   CODE(134, _PLUS)
+#  define plus 134
   // - ( n1 n2 - n3)
   NAME(135, 0, 1, '-', 0, 0)
   LINK(136, 132)
@@ -891,6 +895,7 @@ void setup () {
   NAME(198, 0, 1, 'i', 0, 0)
   LINK(199, 195)
   CODE(200, _I)
+#  define _i 200
   // do
   NAME(201, IMMED, 2, 'd', 'o', 0)
   LINK(202, 198)
@@ -947,11 +952,27 @@ void setup () {
   NAME(240, 0, 2, 'c', '@', 0)
   LINK(241, 237)
   CODE(242, _CFETCH)
+#  define cfetch 242
   // c! ( c b - ) 
   NAME(243, 0, 2, 'c', '!', 0)
   LINK(244, 240)
   CODE(245, _CSTORE)
+  // type ( b c - ) 
+  NAME(246, 0, 4, 't', 'y', 'p')
+  LINK(247, 243)
+  CODE(248, _NEST)
+  DATA(249, over)
+  DATA(250, plus)
+  DATA(251, swap)
+  DATA(252, ddo)
+  DATA(253, _i)
+  DATA(254, cfetch)
+  DATA(255, emit)
+  DATA(256, lloop)
+  DATA(257, 253)
+  DATA(258, exit)
 
+ 
   // test
   DATA(300, lit)
   DATA(301, 10) // i
@@ -971,8 +992,8 @@ void setup () {
 
 
 
-  D = 243; // latest word
-  H = 246; // top of dictionary
+  D = 246; // latest word
+  H = 259; // top of dictionary
 
 //  I = 300; // test
   I = abort; // instruction pointer = abort
