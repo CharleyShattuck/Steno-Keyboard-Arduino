@@ -20,7 +20,6 @@ union Memory {
   void (*program []) (void);
 } memory;
 
-String tib = "";
 int S = S0; // data stack pointer
 int R = R0; // return stack pointer
 int I = 0; // instruction pointer
@@ -194,6 +193,7 @@ void _NEST (void) {
   I = (W + 1);
 }
 
+/*
 void _WORD (void) {
   char t;
   _DUP ();
@@ -241,6 +241,7 @@ void _NUMBER (void) {
   _DUP ();
   T = 0;
 }
+*/
 
 void _EXECUTE (void) {
   if (state == true) {
@@ -452,6 +453,18 @@ void _EQUAL (void) {
   } else {
     T = 0;
   }
+}
+
+void _DOT (void) {
+  Serial.print (T);
+  _DROP ();
+}
+
+void _PLUSSTORE (void) {
+  W = T;
+  _DROP ();
+  T = (memory.data [W] + T);
+  memory.data [W] = T;
 }
 
 
@@ -689,10 +702,12 @@ void setup () {
   NAME(149, 0, 2, 'c', '!', 0)
   LINK(150, 146)
   CODE(151, _CSTORE)
+#  define cstore 151
   // type ( b c - ) 
   NAME(152, 0, 4, 't', 'y', 'p')
-  LINK(153, 243)
+  LINK(153, 149)
   CODE(154, _NEST)
+#  define type 154
   DATA(155, over)
   DATA(156, plus)
   DATA(157, swap)
@@ -720,31 +735,106 @@ void setup () {
   DATA(175, 10)
   DATA(176, emit)
   DATA(177, exit)
+  // space 
+  NAME(178, 0, 5, 's', 'p', 'a')
+  LINK(179, 168)
+  CODE(180, _NEST)
+#  define space 180
+  DATA(181, lit)
+  DATA(182, 32)
+  DATA(183, emit)
+  DATA(184, exit)
+  // >in 
+  NAME(185, 0, 3, '>', 'i', 'n')
+  LINK(186, 178)
+  CODE(187, _DOVAR)
+#  define toin 187
+  DATA(188, 0)
+  // .  // temporary, for initial debug
+  NAME(189, 0, 1, '.', 0, 0)
+  LINK(190, 185)
+  CODE(191, _DOT)
+#  define dot 191
+  // tib
+  NAME(192, 0, 1, '.', 0, 0)
+  LINK(193, 189)
+  CODE(194, _DOCONST)
+# define tib 194
+  DATA(195, 2000) 
+  // +! 
+  NAME(196, 0, 2, '+', '!', 0)
+  LINK(197, 192)
+  CODE(198, _PLUSSTORE)
+# define plusstore 198
+
+  // query 
+  NAME(200, 0, 5, 'q', 'u', 'e')
+  LINK(201, 196)
+  CODE(202, _NEST)
+#  define query 202
+  DATA(203, lit)
+  DATA(204, 0)
+  DATA(205, toin)
+  DATA(206, store)
+  DATA(207, key) // begin
+  DATA(208, dup)
+  DATA(209, lit)
+  DATA(210, 13)
+  DATA(211, minus)
+  DATA(212, zbranch) // while
+  DATA(213, 240)
+  DATA(214, dup)
+  DATA(215, emit)
+  DATA(216, dup)
+  DATA(217, lit)
+  DATA(218, 127) // backspace
+  DATA(219, equal)
+  DATA(220, zbranch) // if
+  DATA(221, 229)
+  DATA(222, drop)
+  DATA(223, lit)
+  DATA(224, -1)
+  DATA(225, toin)
+  DATA(226, plusstore)
+  DATA(227, branch) // else
+  DATA(228, 238)
+  DATA(229, tib)
+  DATA(230, toin)
+  DATA(231, fetch)
+  DATA(232, plus)
+  DATA(233, cstore)
+  DATA(234, lit)
+  DATA(235, 1)
+  DATA(236, toin)
+  DATA(237, plusstore)
+  DATA(238, branch) // repeat
+  DATA(239, 207)
+  DATA(240, drop)
+  DATA(241, exit)
 
 
-// test
+  D = 200; // latest word
+  H = 242; // top of dictionary
+
+  DATA(300, query)
+  DATA(301, tib)
+  DATA(302, toin)
+  DATA(303, fetch)
+  DATA(304, dup)
+  DATA(305, dot)
+  DATA(306, cr)
+  DATA(307, branch)
+  DATA(308, 300)
+
+/*
   DATA(300, key)
   DATA(301, dup)
-  DATA(302, lit)
-  DATA(303, 13)
-  DATA(304, equal)
-  DATA(305, over)
-  DATA(306, lit)
-  DATA(307, 10)
-  DATA(308, equal)
-  DATA(309, oor)
-  DATA(310, zbranch)
-  DATA(311, 316)
-  DATA(312, drop)
-  DATA(313, cr)
-  DATA(314, branch)
-  DATA(315, 300)
-  DATA(316, emit)
-  DATA(317, branch)
-  DATA(318, 300)
-
-  D = 168; // latest word
-  H = 178; // top of dictionary
+  DATA(302, emit)
+  DATA(303, dot)
+  DATA(304, cr)
+  DATA(305, branch)
+  DATA(306, 300)
+*/
 
   I = 300; // test
 //  I = abort; // instruction pointer = abort
@@ -757,8 +847,7 @@ void setup () {
 void loop() {
   W = memory.data [I++];
   memory.program [W] ();
-//  delay (300);
+//  delay (200);
 }
-
 
 
