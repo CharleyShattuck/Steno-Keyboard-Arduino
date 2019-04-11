@@ -647,7 +647,7 @@ void setup () {
   NAME(110, 0, 1, 'i', 0, 0)
   LINK(111, 107)
   CODE(112, _I)
-#  define _i 110
+#  define _i 112
   // do
   NAME(113, IMMED, 2, 'd', 'o', 0)
   LINK(114, 110)
@@ -744,11 +744,11 @@ void setup () {
   DATA(182, 32)
   DATA(183, emit)
   DATA(184, exit)
-  // >in 
-  NAME(185, 0, 3, '>', 'i', 'n')
+  // #tib 
+  NAME(185, 0, 4, '#', 't', 'i')
   LINK(186, 178)
   CODE(187, _DOVAR)
-#  define toin 187
+#  define ntib 187
   DATA(188, 0)
   // .  // temporary, for initial debug
   NAME(189, 0, 1, '.', 0, 0)
@@ -774,7 +774,7 @@ void setup () {
 #  define query 202
   DATA(203, lit)
   DATA(204, 0)
-  DATA(205, toin)
+  DATA(205, ntib)
   DATA(206, store)
   DATA(207, key) // begin
   DATA(208, dup)
@@ -794,18 +794,18 @@ void setup () {
   DATA(222, drop)
   DATA(223, lit)
   DATA(224, -1)
-  DATA(225, toin)
+  DATA(225, ntib)
   DATA(226, plusstore)
   DATA(227, branch) // else
   DATA(228, 238)
   DATA(229, tib)
-  DATA(230, toin)
+  DATA(230, ntib)
   DATA(231, fetch)
   DATA(232, plus)
   DATA(233, cstore)
   DATA(234, lit)
   DATA(235, 1)
-  DATA(236, toin)
+  DATA(236, ntib)
   DATA(237, plusstore)
   DATA(238, branch) // repeat
   DATA(239, 207)
@@ -817,23 +817,31 @@ void setup () {
   H = 242; // top of dictionary
 
   DATA(300, query)
-  DATA(301, tib)
-  DATA(302, toin)
-  DATA(303, fetch)
-  DATA(304, dup)
-  DATA(305, dot)
+  DATA(301, cr)
+  DATA(302, tib)
+  DATA(303, ntib)
+  DATA(304, fetch)
+  DATA(305, type)
   DATA(306, cr)
   DATA(307, branch)
   DATA(308, 300)
 
 /*
-  DATA(300, key)
-  DATA(301, dup)
-  DATA(302, emit)
-  DATA(303, dot)
-  DATA(304, cr)
-  DATA(305, branch)
-  DATA(306, 300)
+  DATA(300, lit)
+  DATA(301, 100)
+  DATA(302, lit)
+  DATA(303, 10)
+  DATA(304, over)
+  DATA(305, plus)
+  DATA(306, swap)
+  DATA(307, ddo)
+  DATA(308, _i)
+  DATA(309, dot)
+  DATA(310, lloop)
+  DATA(311, 308)
+  DATA(312, cr)
+  DATA(313, branch)
+  DATA(314, 300)
 */
 
   I = 300; // test
@@ -847,7 +855,7 @@ void setup () {
 void loop() {
   W = memory.data [I++];
   memory.program [W] ();
-//  delay (200);
+//  delay (100);
 }
 
 
