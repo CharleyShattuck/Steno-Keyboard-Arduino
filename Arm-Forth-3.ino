@@ -465,8 +465,16 @@ void _PLUSSTORE (void) {
   _DROP ();
   T = (memory.data [W] + T);
   memory.data [W] = T;
+  _DROP ();
 }
 
+void _COUNT (void) {
+  W = (memory.data [T] & 0xff);
+  T *= 4;
+  T += 1;
+  _DUP ();
+  T = W;
+}
 
 void setup () {
   S = S0; // initialize data stack
@@ -756,7 +764,7 @@ void setup () {
   CODE(191, _DOT)
 #  define dot 191
   // tib
-  NAME(192, 0, 1, '.', 0, 0)
+  NAME(192, 0, 3, 't', 'i', 'b')
   LINK(193, 189)
   CODE(194, _DOCONST)
 # define tib 194
@@ -811,37 +819,70 @@ void setup () {
   DATA(239, 207)
   DATA(240, drop)
   DATA(241, exit)
+  // count ( a - b c)
+  NAME(242, 0, 5, 'c', 'o', 'u')
+  LINK(243, 200)
+  CODE(244, _COUNT)
+# define count 244
+  // >in ( - b) 
+  NAME(245, 0, 3, '>', 'i', 'n')
+  LINK(246, 242)
+  CODE(247, _DOVAR)
+#  define toin 247
+  DATA(248, 0)
+  // char ( - c)
+  NAME(249, 0, 4, 'c', 'h', 'a')
+  LINK(250, 245)
+  CODE(251, _NEST)
+# define cchar 251
+  DATA(252, tib)
+  DATA(253, toin)
+  DATA(254, fetch)
+  DATA(255, plus)
+  DATA(256, cfetch)
+  DATA(257, lit)
+  DATA(258, 1)
+  DATA(259, toin)
+  DATA(260, plusstore)
+  DATA(261, exit)
 
+  D = 249; // latest word
+  H = 262; // top of dictionary
 
-  D = 200; // latest word
-  H = 242; // top of dictionary
+  DATA(300, query)
+  DATA(301, cr)
+  DATA(302, lit)
+  DATA(303, 0)
+  DATA(304, toin)
+  DATA(305, store)
+  DATA(306, cchar) // begin
+  DATA(307, emit)
+  DATA(308, space)
+  DATA(309, toin)
+  DATA(310, fetch)
+  DATA(311, ntib)
+  DATA(312, fetch)
+  DATA(313, equal)
+  DATA(314, zbranch) // until
+  DATA(315, 306)
+  DATA(316, cr)
+  DATA(317, tib)
+  DATA(318, ntib)
+  DATA(319, fetch)
+  DATA(320, type)
+  DATA(321, cr)
+  DATA(322, branch)
+  DATA(323, 300)
 
+/*
   DATA(300, query)
   DATA(301, cr)
   DATA(302, tib)
   DATA(303, ntib)
-  DATA(304, fetch)
-  DATA(305, type)
-  DATA(306, cr)
-  DATA(307, branch)
-  DATA(308, 300)
-
-/*
-  DATA(300, lit)
-  DATA(301, 100)
-  DATA(302, lit)
-  DATA(303, 10)
-  DATA(304, over)
-  DATA(305, plus)
-  DATA(306, swap)
-  DATA(307, ddo)
-  DATA(308, _i)
-  DATA(309, dot)
-  DATA(310, lloop)
-  DATA(311, 308)
-  DATA(312, cr)
-  DATA(313, branch)
-  DATA(314, 300)
+  DATA(304, type)
+  DATA(305, cr)
+  DATA(306, branch)
+  DATA(307, 300)
 */
 
   I = 300; // test
