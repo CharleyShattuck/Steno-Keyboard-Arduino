@@ -818,37 +818,67 @@ void setup () {
   DATA(238, branch) // repeat
   DATA(239, 207)
   DATA(240, drop)
-  DATA(241, exit)
+  DATA(241, lit)
+  DATA(242, 0)
+  DATA(243, 251) // forward reference to >in
+  DATA(244, store)
+  DATA(245, exit)
   // count ( a - b c)
-  NAME(242, 0, 5, 'c', 'o', 'u')
-  LINK(243, 200)
-  CODE(244, _COUNT)
-# define count 244
+  NAME(246, 0, 5, 'c', 'o', 'u')
+  LINK(247, 200)
+  CODE(248, _COUNT)
+# define count 248
   // >in ( - b) 
-  NAME(245, 0, 3, '>', 'i', 'n')
-  LINK(246, 242)
-  CODE(247, _DOVAR)
-#  define toin 247
-  DATA(248, 0)
+  NAME(249, 0, 3, '>', 'i', 'n')
+  LINK(250, 242)
+  CODE(251, _DOVAR)
+#  define toin 251
+  DATA(252, 0)
   // char ( - c)
-  NAME(249, 0, 4, 'c', 'h', 'a')
-  LINK(250, 245)
-  CODE(251, _NEST)
-# define cchar 251
-  DATA(252, tib)
-  DATA(253, toin)
-  DATA(254, fetch)
-  DATA(255, plus)
-  DATA(256, cfetch)
-  DATA(257, lit)
-  DATA(258, 1)
-  DATA(259, toin)
-  DATA(260, plusstore)
-  DATA(261, exit)
+  NAME(253, 0, 4, 'c', 'h', 'a')
+  LINK(254, 245)
+  CODE(255, _NEST)
+# define cchar 255
+  DATA(256, tib)
+  DATA(257, toin)
+  DATA(258, fetch)
+  DATA(259, plus)
+  DATA(260, cfetch)
+  DATA(261, lit)
+  DATA(262, 1)
+  DATA(263, toin)
+  DATA(264, plusstore)
+  DATA(265, exit)
 
-  D = 249; // latest word
-  H = 262; // top of dictionary
+  // trim ( c - c)
+  NAME(266, 0, 4, 't', 'r', 'i')
+  LINK(267, 253)
+  CODE(268, _NEST)
+#  define ttrim 268
+  DATA(269, cchar) // begin
+  DATA(270, over)
+  DATA(271, minus)
+  DATA(272, toin)
+  DATA(273, fetch)
+  DATA(274, ntib)
+  DATA(275, fetch)
+  DATA(276, equal)
+  DATA(277, oor)
+  DATA(278, zbranch) // if
+  DATA(279, 285)
+  DATA(280, lit)
+  DATA(281, -1)
+  DATA(282, toin)
+  DATA(283, plusstore)
+  DATA(284, exit)
+  DATA(285, branch) // again
+  DATA(286, 269)
 
+
+  D = 266; // latest word
+  H = 287; // top of dictionary
+
+/*
   DATA(300, query)
   DATA(301, cr)
   DATA(302, lit)
@@ -873,17 +903,27 @@ void setup () {
   DATA(321, cr)
   DATA(322, branch)
   DATA(323, 300)
+*/
 
-/*
   DATA(300, query)
   DATA(301, cr)
-  DATA(302, tib)
-  DATA(303, ntib)
-  DATA(304, type)
-  DATA(305, cr)
-  DATA(306, branch)
-  DATA(307, 300)
-*/
+  DATA(302, lit)
+  DATA(303, 32) // bl
+  DATA(304, ttrim)
+  DATA(305, tib)
+  DATA(306, toin)
+  DATA(307, fetch)
+  DATA(308, plus)
+  DATA(309, ntib)
+  DATA(310, fetch)
+  DATA(311, toin)
+  DATA(312, fetch)
+  DATA(313, minus)
+  DATA(314, type)
+  DATA(315, cr)
+  DATA(316, branch)
+  DATA(317, 300)
+
 
   I = 300; // test
 //  I = abort; // instruction pointer = abort
