@@ -7,6 +7,7 @@
 
 #define RAM_SIZE 0x1200
 #define S0 0x1000
+#define _TIB 0x4004 // (4 * S0) + 4
 #define R0 0x0f00
 #define NAME(m, f, c, x, y, z) {memory.data [m] = f + c + (x << 8) + (y << 16) + (z << 24);}
 #define LINK(m, a) {memory.data [m] = a;}
@@ -456,8 +457,9 @@ void _EQUAL (void) {
 }
 
 void _DOT (void) {
-  Serial.print (T);
+  Serial.print (T, HEX);
   _DROP ();
+  Serial.write (' ');
 }
 
 void _PLUSSTORE (void) {
@@ -474,6 +476,25 @@ void _COUNT (void) {
   T += 1;
   _DUP ();
   T = W;
+}
+
+void _ONEPLUS (void) {
+  T += 1;
+}
+
+void _ONEMINUS (void) {
+  T -= 1;
+}
+
+void _DEBUG (void) {
+  _DUP ();
+  T = R;
+  _DOT ();
+  Serial.print (" ");
+  _DUP ();
+  T = S;
+  _DOT ();
+  Serial.println (" ");
 }
 
 void setup () {
@@ -768,7 +789,7 @@ void setup () {
   LINK(193, 189)
   CODE(194, _DOCONST)
 # define tib 194
-  DATA(195, 2000) 
+  DATA(195, _TIB) 
   // +! 
   NAME(196, 0, 2, '+', '!', 0)
   LINK(197, 192)
@@ -839,93 +860,162 @@ void setup () {
   LINK(254, 245)
   CODE(255, _NEST)
 # define cchar 255
-  DATA(256, tib)
-  DATA(257, toin)
-  DATA(258, fetch)
-  DATA(259, plus)
-  DATA(260, cfetch)
-  DATA(261, lit)
-  DATA(262, 1)
-  DATA(263, toin)
-  DATA(264, plusstore)
-  DATA(265, exit)
-
+  DATA(256, toin)
+  DATA(257, fetch)
+  DATA(258, ntib)
+  DATA(259, fetch)
+  DATA(260, equal)
+  DATA(261, zbranch) // if
+  DATA(262, 267)
+  DATA(263, lit)
+  DATA(264, 32)
+  DATA(265, branch) // else
+  DATA(266, 271)
+  DATA(267, tib)
+  DATA(268, toin)
+  DATA(269, fetch)
+  DATA(270, plus)
+  DATA(271, cfetch) // then
+  DATA(272, lit)
+  DATA(273, 1)
+  DATA(274, toin)
+  DATA(275, plusstore)
+  DATA(276, exit)
   // trim ( c - c)
-  NAME(266, 0, 4, 't', 'r', 'i')
-  LINK(267, 253)
-  CODE(268, _NEST)
-#  define ttrim 268
-  DATA(269, cchar) // begin
-  DATA(270, over)
-  DATA(271, minus)
-  DATA(272, toin)
-  DATA(273, fetch)
-  DATA(274, ntib)
-  DATA(275, fetch)
-  DATA(276, equal)
-  DATA(277, oor)
-  DATA(278, zbranch) // if
-  DATA(279, 285)
-  DATA(280, lit)
-  DATA(281, -1)
-  DATA(282, toin)
-  DATA(283, plusstore)
-  DATA(284, exit)
-  DATA(285, branch) // again
-  DATA(286, 269)
+  NAME(277, 0, 4, 't', 'r', 'i')
+  LINK(278, 253)
+  CODE(279, _NEST)
+#  define ttrim 279
+  DATA(280, cchar) // begin
+  DATA(281, over)
+  DATA(282, minus)
+  DATA(283, toin)
+  DATA(284, fetch)
+  DATA(285, ntib)
+  DATA(286, fetch)
+  DATA(287, equal)
+  DATA(288, oor)
+  DATA(289, zbranch) // if
+  DATA(290, 296)
+  DATA(291, lit)
+  DATA(292, -1)
+  DATA(293, toin)
+  DATA(294, plusstore)
+  DATA(295, exit)
+  DATA(296, branch) // again
+  DATA(297, 280)
+  // 1+
+  NAME(299, 0, 2, '1', '+', 0)
+  LINK(300, 277)
+  CODE(301, _ONEPLUS)
+#  define oneplus 301
+  // 1-
+  NAME(302, 0, 2, '1', '-', 0)
+  LINK(303, 299)
+  CODE(304, _ONEMINUS)
+#  define oneminus 304
+  // bl
+  NAME(305, 0, 2, 'b', 'l', 0)
+  LINK(306, 302)
+  CODE(307, _DOCONST)
+#  define bl 307
+  DATA(308, 32)
+  // #chars ( c - c n)
+  NAME(309, 0, 5, '#', 'c', 'h')
+  LINK(310, 309)
+  CODE(311, _NEST)
+#  define nchars 311
+  DATA(312, toin)
+  DATA(313, fetch)
+  DATA(314, swap)
+  DATA(315, cchar) // begin 
+  DATA(316, over)
+  DATA(317, equal)
+  DATA(318, zbranch) // if
+  DATA(319, 330)
+  DATA(320, swap)
+  DATA(321, toin)
+  DATA(322, fetch)
+  DATA(323, over)
+  DATA(324, minus)
+  DATA(325, oneminus)
+  DATA(326, swap)
+  DATA(327, toin)
+  DATA(328, store)
+  DATA(329, exit)
+  DATA(330, branch) // again then
+  DATA(331, 315)
+  // word ( c - a)
+  NAME(332, 0, 4, 'w', 'o', 'r')
+  LINK(333, 309)
+  CODE(334, _NEST)
+#  define wword 334
+  DATA(335, ttrim)
+  DATA(336, nchars)
+  DATA(337, here)
+  DATA(338, store)
+  DATA(339, here)
+  DATA(340, count)
+  DATA(341, over)
+  DATA(342, plus)
+  DATA(343, swap)
+  DATA(344, ddo)
+  DATA(345, cchar)
+  DATA(346, _i)
+  DATA(347, cstore)
+  DATA(348, lloop)
+  DATA(349, 345)
+  DATA(350, here)
+  DATA(351, exit)
+  // debug
+  NAME(352, 0, 5, 'd', 'e', 'b')
+  LINK(353, 332)
+  CODE(354, _DEBUG)
+#  define debug 354
+  
+  D = 352; // latest word
+  H = 355; // top of dictionary
 
 
-  D = 266; // latest word
-  H = 287; // top of dictionary
+  DATA(400, query)
+  DATA(401, cr)
+  DATA(402, bl)
+  DATA(403, wword)
+  DATA(404, count)
+  DATA(405, type)
+  DATA(406, bl)
+  DATA(407, wword)
+  DATA(408, count)
+  DATA(409, type)
+  DATA(410, bl)
+  DATA(411, wword)
+  DATA(412, count)
+  DATA(413, type)
+  DATA(414, bl)
+  DATA(415, wword)
+  DATA(416, count)
+  DATA(417, type)
+  DATA(418, cr)
+  DATA(419, branch) // again
+  DATA(420, 400)
 
 /*
-  DATA(300, query)
-  DATA(301, cr)
-  DATA(302, lit)
-  DATA(303, 0)
-  DATA(304, toin)
-  DATA(305, store)
-  DATA(306, cchar) // begin
-  DATA(307, emit)
-  DATA(308, space)
-  DATA(309, toin)
-  DATA(310, fetch)
-  DATA(311, ntib)
-  DATA(312, fetch)
-  DATA(313, equal)
-  DATA(314, zbranch) // until
-  DATA(315, 306)
-  DATA(316, cr)
-  DATA(317, tib)
-  DATA(318, ntib)
-  DATA(319, fetch)
-  DATA(320, type)
-  DATA(321, cr)
-  DATA(322, branch)
-  DATA(323, 300)
+  DATA(405, here)
+  DATA(406, count)
+  DATA(407, type)
+  DATA(408, cr)
+  DATA(409, lit)
+  DATA(410, 32)
+  DATA(411, wword)
+  DATA(412, here)
+  DATA(413, count)
+  DATA(414, type)
+  DATA(415, cr)
+  DATA(416, branch)
+  DATA(417, 400)
 */
 
-  DATA(300, query)
-  DATA(301, cr)
-  DATA(302, lit)
-  DATA(303, 32) // bl
-  DATA(304, ttrim)
-  DATA(305, tib)
-  DATA(306, toin)
-  DATA(307, fetch)
-  DATA(308, plus)
-  DATA(309, ntib)
-  DATA(310, fetch)
-  DATA(311, toin)
-  DATA(312, fetch)
-  DATA(313, minus)
-  DATA(314, type)
-  DATA(315, cr)
-  DATA(316, branch)
-  DATA(317, 300)
-
-
-  I = 300; // test
+  I = 400; // test
 //  I = abort; // instruction pointer = abort
   Serial.begin (9600);
   while (!Serial);
@@ -938,5 +1028,3 @@ void loop() {
   memory.program [W] ();
 //  delay (100);
 }
-
-
