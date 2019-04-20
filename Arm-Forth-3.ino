@@ -931,73 +931,115 @@ void setup () {
   DATA(315, cchar) // begin 
   DATA(316, over)
   DATA(317, equal)
-  DATA(318, zbranch) // if
-  DATA(319, 330)
-  DATA(320, swap)
-  DATA(321, toin)
-  DATA(322, fetch)
-  DATA(323, over)
-  DATA(324, minus)
-  DATA(325, oneminus)
-  DATA(326, swap)
-  DATA(327, toin)
-  DATA(328, store)
-  DATA(329, exit)
-  DATA(330, branch) // again then
-  DATA(331, 315)
+  DATA(318, toin)
+  DATA(319, fetch)
+  DATA(320, ntib)
+  DATA(321, fetch)
+  DATA(322, oneplus)
+  DATA(323, equal)
+  DATA(324, oor)
+  DATA(325, zbranch) // if
+  DATA(326, 337)
+  DATA(327, swap)
+  DATA(328, toin)
+  DATA(329, fetch)
+  DATA(330, over)
+  DATA(331, minus)
+  DATA(332, oneminus)
+  DATA(333, swap)
+  DATA(334, toin)
+  DATA(335, store)
+  DATA(336, exit)
+  DATA(337, branch) // again then
+  DATA(338, 315)
   // word ( c - a)
-  NAME(332, 0, 4, 'w', 'o', 'r')
-  LINK(333, 309)
-  CODE(334, _NEST)
-#  define wword 334
-  DATA(335, ttrim)
-  DATA(336, nchars)
-  DATA(337, here)
-  DATA(338, store)
-  DATA(339, here)
-  DATA(340, count)
-  DATA(341, over)
-  DATA(342, plus)
-  DATA(343, swap)
-  DATA(344, ddo)
-  DATA(345, cchar)
-  DATA(346, _i)
-  DATA(347, cstore)
-  DATA(348, lloop)
-  DATA(349, 345)
-  DATA(350, here)
-  DATA(351, exit)
+  NAME(339, 0, 4, 'w', 'o', 'r')
+  LINK(340, 309)
+  CODE(341, _NEST)
+#  define wword 341
+  DATA(342, ttrim)
+  DATA(343, nchars)
+  DATA(344, here)
+  DATA(345, store)
+  DATA(346, here)
+  DATA(347, count)
+  DATA(348, over)
+  DATA(349, plus)
+  DATA(350, swap)
+  DATA(351, ddo)
+  DATA(352, cchar)
+  DATA(353, _i)
+  DATA(354, cstore)
+  DATA(355, lloop)
+  DATA(356, 352)
+  DATA(357, here)
+  DATA(358, exit)
   // debug
-  NAME(352, 0, 5, 'd', 'e', 'b')
-  LINK(353, 332)
-  CODE(354, _DEBUG)
-#  define debug 354
+  NAME(359, 0, 5, 'd', 'e', 'b')
+  LINK(360, 339)
+  CODE(361, _DEBUG)
+#  define debug 361
+  // -trailing ( b c - )
+  NAME(362, 0, 9, '-', 't', 'r')
+  LINK(363, 359)
+  CODE(364, _NEST)
+#  define dashtrailing 364
+  DATA(365, over) // begin
+  DATA(366, over)
+  DATA(367, plus)
+  DATA(368, oneminus)
+  DATA(369, cfetch)
+  DATA(370, bl)
+  DATA(371, equal)
+  DATA(372, zbranch) // while
+  DATA(373, 377)
+  DATA(374, oneminus)
+  DATA(375, branch) // repeat
+  DATA(376, 365)
+  DATA(377, exit)
+
   
-  D = 352; // latest word
-  H = 355; // top of dictionary
+  D = 359; // latest word
+  H = 362; // top of dictionary
 
 
-  DATA(400, query)
+  DATA(400, query) // begin
   DATA(401, cr)
-  DATA(402, bl)
-  DATA(403, wword)
-  DATA(404, count)
-  DATA(405, type)
-  DATA(406, bl)
-  DATA(407, wword)
-  DATA(408, count)
-  DATA(409, type)
-  DATA(410, bl)
-  DATA(411, wword)
-  DATA(412, count)
-  DATA(413, type)
-  DATA(414, bl)
-  DATA(415, wword)
-  DATA(416, count)
-  DATA(417, type)
-  DATA(418, cr)
-  DATA(419, branch) // again
-  DATA(420, 400)
+  DATA(402, tib)
+  DATA(403, ntib)
+  DATA(404, fetch)
+  DATA(405, dashtrailing)
+  DATA(406, type)
+  DATA(407, lit)
+  DATA(408, 47)
+  DATA(409, emit)
+  DATA(410, cr)
+  DATA(411, branch)
+  DATA(412, 400)
+
+/*
+  DATA(406, ntib)
+  DATA(407, store)
+  DATA(408, drop)
+  DATA(409, toin) // begin
+  DATA(410, fetch)
+  DATA(411, ntib)
+  DATA(412, fetch)
+  DATA(413, minus)
+  DATA(414, zeroless)
+  DATA(415, zbranch) // while
+  DATA(416, 424)
+  DATA(417, bl)
+  DATA(418, wword)
+  DATA(419, count)
+  DATA(420, dot) // type
+  DATA(421, cr)
+  DATA(422, branch) // repeat
+  DATA(423, 409)
+  DATA(424, cr)
+  DATA(425, branch) // again
+  DATA(426, 400)
+*/
 
 /*
   DATA(405, here)
