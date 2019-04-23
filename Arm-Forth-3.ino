@@ -497,6 +497,29 @@ void _DEBUG (void) {
   Serial.println (" ");
 }
 
+void _CR (void) {
+  Serial.write (13);
+  Serial.write (10);
+}
+
+void _SPACE (void) {
+  Serial.write (32);
+}
+
+void _BL (void) {
+  _DUP ();
+  T = 32;
+}
+
+void _DASHTRAILING (void) {
+  int A = 0;
+  do {
+    _OVER (); _OVER (); _PLUS (); _ONEMINUS ();
+    _CFETCH (); A = T; _DROP ();
+    if (A == 32) _ONEMINUS ();
+  } while (A == 32) ;
+} 
+
 void setup () {
   S = S0; // initialize data stack
   R = R0; // initialize return stack
@@ -518,13 +541,11 @@ void setup () {
 #  define initr 6
   CODE(7, _INITS)
 #  define inits 7
-//  CODE(8, _SHOWTIB)
-// #  define showtib 8
-//  CODE(9, _OK)
-// .#  define ok 9
+//  CODE(8, _OK)
+// .#  define ok 8
   // room to expand here
 
-  // trailing space kludge
+  // trailing space kludge (is this needed now?)
   NAME(20, 0, 0, 10, 0, 0)
   LINK(21, 0)
   CODE(22, _NOP)
@@ -755,50 +776,55 @@ void setup () {
   // cr
   NAME(168, 0, 2, 'c', 'r', 0)
   LINK(169, 165)
-  CODE(170, _NEST)
+  CODE(170, _CR)
 #  define cr 170
-  DATA(171, lit)
-  DATA(172, 13)
-  DATA(173, emit)
-  DATA(174, lit)
-  DATA(175, 10)
-  DATA(176, emit)
-  DATA(177, exit)
   // space 
-  NAME(178, 0, 5, 's', 'p', 'a')
-  LINK(179, 168)
-  CODE(180, _NEST)
-#  define space 180
-  DATA(181, lit)
-  DATA(182, 32)
-  DATA(183, emit)
-  DATA(184, exit)
+  NAME(171, 0, 5, 's', 'p', 'a')
+  LINK(172, 168)
+  CODE(173, _SPACE)
+#  define space 173
+  // -trailing ( b c - )
+  NAME(174, 0, 9, '-', 't', 'r')
+  LINK(175, 171)
+  CODE(176, _DASHTRAILING)
+#  define dashtrailing 176
   // #tib 
-  NAME(185, 0, 4, '#', 't', 'i')
-  LINK(186, 178)
-  CODE(187, _DOVAR)
-#  define ntib 187
-  DATA(188, 0)
+  NAME(177, 0, 4, '#', 't', 'i')
+  LINK(178, 174)
+  CODE(179, _DOVAR)
+#  define ntib 179
+  DATA(180, 0)
   // .  // temporary, for initial debug
-  NAME(189, 0, 1, '.', 0, 0)
-  LINK(190, 185)
-  CODE(191, _DOT)
-#  define dot 191
+  NAME(181, 0, 1, '.', 0, 0)
+  LINK(182, 177)
+  CODE(183, _DOT)
+#  define dot 183
   // tib
-  NAME(192, 0, 3, 't', 'i', 'b')
-  LINK(193, 189)
-  CODE(194, _DOCONST)
-# define tib 194
-  DATA(195, _TIB) 
+  NAME(184, 0, 3, 't', 'i', 'b')
+  LINK(185, 181)
+  CODE(186, _DOCONST)
+# define tib 186
+  DATA(187, _TIB) 
   // +! 
-  NAME(196, 0, 2, '+', '!', 0)
-  LINK(197, 192)
-  CODE(198, _PLUSSTORE)
-# define plusstore 198
+  NAME(188, 0, 2, '+', '!', 0)
+  LINK(189, 184)
+  CODE(190, _PLUSSTORE)
+# define plusstore 190
+  // >in ( - b) 
+  NAME(191, 0, 3, '>', 'i', 'n')
+  LINK(192, 188)
+  CODE(193, _DOVAR)
+#  define toin 193 
+  DATA(194, 0)
+  // count ( a - b c)
+  NAME(195, 0, 5, 'c', 'o', 'u')
+  LINK(196, 191)
+  CODE(197, _COUNT)
+# define count 197
 
   // query 
   NAME(200, 0, 5, 'q', 'u', 'e')
-  LINK(201, 196)
+  LINK(201, 195)
   CODE(202, _NEST)
 #  define query 202
   DATA(203, lit)
@@ -841,23 +867,20 @@ void setup () {
   DATA(240, drop)
   DATA(241, lit)
   DATA(242, 0)
-  DATA(243, 251) // forward reference to >in
+  DATA(243, toin)
   DATA(244, store)
-  DATA(245, exit)
-  // count ( a - b c)
-  NAME(246, 0, 5, 'c', 'o', 'u')
-  LINK(247, 200)
-  CODE(248, _COUNT)
-# define count 248
-  // >in ( - b) 
-  NAME(249, 0, 3, '>', 'i', 'n')
-  LINK(250, 242)
-  CODE(251, _DOVAR)
-#  define toin 251
-  DATA(252, 0)
+  DATA(245, tib)
+  DATA(246, ntib)
+  DATA(247, fetch)
+  DATA(248, dashtrailing)
+  DATA(249, ntib)
+  DATA(250, store)
+  DATA(251, drop)
+  DATA(252, exit)
+
   // char ( - c)
   NAME(253, 0, 4, 'c', 'h', 'a')
-  LINK(254, 245)
+  LINK(254, 200)
   CODE(255, _NEST)
 # define cchar 255
   DATA(256, toin)
@@ -917,9 +940,9 @@ void setup () {
   // bl
   NAME(305, 0, 2, 'b', 'l', 0)
   LINK(306, 302)
-  CODE(307, _DOCONST)
+  CODE(307, _BL)
 #  define bl 307
-  DATA(308, 32)
+//  DATA(308, 32)
   // #chars ( c - c n)
   NAME(309, 0, 5, '#', 'c', 'h')
   LINK(310, 309)
@@ -979,48 +1002,21 @@ void setup () {
   LINK(360, 339)
   CODE(361, _DEBUG)
 #  define debug 361
-  // -trailing ( b c - )
-  NAME(362, 0, 9, '-', 't', 'r')
-  LINK(363, 359)
-  CODE(364, _NEST)
-#  define dashtrailing 364
-  DATA(365, over) // begin
-  DATA(366, over)
-  DATA(367, plus)
-  DATA(368, oneminus)
-  DATA(369, cfetch)
-  DATA(370, bl)
-  DATA(371, equal)
-  DATA(372, zbranch) // while
-  DATA(373, 377)
-  DATA(374, oneminus)
-  DATA(375, branch) // repeat
-  DATA(376, 365)
-  DATA(377, exit)
 
-  
+
   D = 359; // latest word
   H = 362; // top of dictionary
 
 
-  DATA(400, query) // begin
-  DATA(401, cr)
-  DATA(402, tib)
-  DATA(403, ntib)
-  DATA(404, fetch)
-  DATA(405, dashtrailing)
-  DATA(406, type)
-  DATA(407, lit)
-  DATA(408, 47)
-  DATA(409, emit)
-  DATA(410, cr)
-  DATA(411, branch)
-  DATA(412, 400)
-
-/*
-  DATA(406, ntib)
-  DATA(407, store)
-  DATA(408, drop)
+  DATA(407, query) // begin
+  DATA(408, cr)
+//  DATA(402, tib)
+//  DATA(403, ntib)
+//  DATA(404, fetch)
+//  DATA(405, dashtrailing)
+//  DATA(406, ntib)
+//  DATA(407, store)
+//  DATA(408, drop)
   DATA(409, toin) // begin
   DATA(410, fetch)
   DATA(411, ntib)
@@ -1032,32 +1028,15 @@ void setup () {
   DATA(417, bl)
   DATA(418, wword)
   DATA(419, count)
-  DATA(420, dot) // type
+  DATA(420, type)
   DATA(421, cr)
   DATA(422, branch) // repeat
   DATA(423, 409)
   DATA(424, cr)
   DATA(425, branch) // again
-  DATA(426, 400)
-*/
+  DATA(426, 407)
 
-/*
-  DATA(405, here)
-  DATA(406, count)
-  DATA(407, type)
-  DATA(408, cr)
-  DATA(409, lit)
-  DATA(410, 32)
-  DATA(411, wword)
-  DATA(412, here)
-  DATA(413, count)
-  DATA(414, type)
-  DATA(415, cr)
-  DATA(416, branch)
-  DATA(417, 400)
-*/
-
-  I = 400; // test
+  I = 407; // test
 //  I = abort; // instruction pointer = abort
   Serial.begin (9600);
   while (!Serial);
