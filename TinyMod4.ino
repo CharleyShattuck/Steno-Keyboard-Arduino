@@ -5,6 +5,9 @@
 #include <Keyboard.h>
 #include <Wire.h>
 
+#define NO_GEMINI 6
+byte Gemini [NO_GEMINI];
+
 /* Structure of a dictionary entry */
 typedef struct {
   const char *name;
@@ -405,6 +408,46 @@ void send_NKRO () {
   Keyboard.releaseAll ();
 }
 
+void spout (int a, char b) {
+  if (a) {
+    Keyboard.press (b);
+  } else {
+    Keyboard.press (' ');
+  }
+  delay (2);
+  Keyboard.releaseAll ();
+}
+
+void send_AtoZ () {
+  int b = POP ();
+  int a = POP ();
+ 
+  spout ((b & 0x20), '#');
+
+  spout ((a & 0x18), 'S');
+  spout ((a & 0x20), 'T');
+  spout ((a & 0x04), 'K');
+  spout ((a & 0x40), 'P');
+  spout ((a & 0x02), 'W');
+  spout ((a & 0x80), 'H');
+  spout ((a & 0x01), 'R');
+  spout ((b & 0x08), 'A');
+  spout ((b & 0x10), 'O');
+  spout (((a & 0x100) | (b & 0x200)), '*');
+  spout ((b & 0x40), 'E');
+  spout ((b & 0x80), 'U');
+  spout ((b & 0x8000), 'F');
+  spout ((b & 0x01), 'R');
+  spout ((b & 0x4000), 'P');
+  spout ((b & 0x02), 'B');
+  spout ((b & 0x2000), 'L');
+  spout ((b & 0x04), 'G');
+  spout ((b & 0x1000), 'T');
+  spout ((b & 0x800), 'S');
+  spout ((b & 0x100), 'D');
+  spout ((b & 0x400), 'Z');
+}
+
 void init_NKRO () {
   Keyboard.begin (); delay (3000);
 }
@@ -414,6 +457,70 @@ void NKRO () {
   while (1) {
     scan ();
     send_NKRO ();
+  }
+}
+
+void AtoZ () {
+  init_NKRO ();
+  while (1) {
+    scan ();
+    send_AtoZ ();
+    Keyboard.press ('\n');
+    delay (5);
+    Keyboard.release ('\n');
+  }
+}
+
+// Gemini PR protocol
+void sendPR(){
+  for (byte i = 0; i < NO_GEMINI; i++) {
+     Gemini[i] = (0);
+  }
+  int b = POP ();
+  int a = POP ();
+
+  Gemini[0] = 0x80; // first byte in a packet
+
+  if (a & 0x10) Gemini[1] |= 0x40; // S1
+  if (a & 0x08) Gemini[1] |= 0x20; // S2
+  if (a & 0x20) Gemini[1] |= 0x10; // T
+  if (a & 0x04) Gemini[1] |= 0x08; // K
+  if (a & 0x40) Gemini[1] |= 0x04; // P
+  if (a & 0x02) Gemini[1] |= 0x02; // W 
+  if (a & 0x80) Gemini[1] |= 0x01; // H
+
+  if (a & 0x01) Gemini[2] |= 0x40; // R
+  if (b & 0x08) Gemini[2] |= 0x20; // A
+  if (b & 0x10) Gemini[2] |= 0x10; // O
+  if (a & 0x100) Gemini[2] |= 0x08; // *
+  if (b & 0x200) Gemini[2] |= 0x04; // *
+
+  if (b & 0x40) Gemini[3] |= 0x08; // E 
+  if (b & 0x80) Gemini[3] |= 0x04; // U 
+  if (b & 0x8000) Gemini[3] |= 0x02; // F 
+  if (b & 0x01) Gemini[3] |= 0x01; // R
+
+  if (b & 0x4000) Gemini[4] |= 0x40; // P
+  if (b & 0x02) Gemini[4] |= 0x20; // B
+  if (b & 0x2000) Gemini[4] |= 0x10; // L 
+  if (b & 0x04) Gemini[4] |= 0x08; // G
+  if (b & 0x1000) Gemini[4] |= 0x04; // T
+  if (b & 0x800) Gemini[4] |= 0x02; // S
+  if (b & 0x100) Gemini[4] |= 0x01; // D
+
+  if (b & 0x20) Gemini[5] |= 0x40; // #7 
+  if (b & 0x400) Gemini[5] |= 0x01; // Z
+
+  for(int i=0; i<NO_GEMINI; i++) Serial.write(Gemini[i]);
+  delay(20);  // wait a bit before scanning again    
+}
+
+void serial_protocol(){
+  Serial.begin(9600);
+  delay(3000); // Apparently Arduino Micro needs this
+  while(true){
+    scan();
+    sendPR();
   }
 }
 
@@ -573,9 +680,9 @@ void interpret () {
 void setup() {
   INIT();
   if (digitalRead (PROTOCOL)) {
-    interpret ();
+    serial_protocol ();
   } else {
-    NKRO ();
+    AtoZ ();
   }
 }
 
@@ -583,4 +690,3 @@ void setup() {
 void loop() {
   while (true);
 }
-
