@@ -682,7 +682,8 @@ void setup() {
   if (digitalRead (PROTOCOL)) {
     serial_protocol ();
   } else {
-    AtoZ ();
+    NKRO ();
+//    AtoZ ();
   }
 }
 
