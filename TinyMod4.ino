@@ -5,6 +5,9 @@
 #include <Keyboard.h>
 #include <Wire.h>
 
+#define NO_BOLT 4
+byte bolt [NO_BOLT];
+
 #define NO_GEMINI 6
 byte Gemini [NO_GEMINI];
 
@@ -515,12 +518,53 @@ void sendPR(){
   delay(20);  // wait a bit before scanning again    
 }
 
+void sendTX () {
+  for (byte i = 0; i < NO_BOLT; i++) {
+    bolt [i] = (i * 0x40);
+  }
+  int b = POP ();
+  int a = POP ();
+
+  if (a & 0x10) bolt [0] |= 0x01; // S1
+  if (a & 0x08) bolt [0] |= 0x01; // S2
+  if (a & 0x20) bolt [0] |= 0x02; // T
+  if (a & 0x04) bolt [0] |= 0x04; // K
+  if (a & 0x40) bolt [0] |= 0x08; // P
+  if (a & 0x02) bolt [0] |= 0x10; // W 
+  if (a & 0x80) bolt [0] |= 0x20; // H
+
+  if (a & 0x01)  bolt [1] |= 0x01; // R
+  if (b & 0x08)  bolt [1] |= 0x02; // A
+  if (b & 0x10)  bolt [1] |= 0x04; // O
+  if (a & 0x100) bolt [1] |= 0x08; // *
+  if (b & 0x200) bolt [1] |= 0x08; // *
+  if (b & 0x40)  bolt [1] |= 0x10; // E 
+  if (b & 0x80)  bolt [1] |= 0x20; // U
+
+  if (b & 0x8000) bolt [2] |= 0x01; // F 
+  if (b & 0x01)   bolt [2] |= 0x02; // R
+  if (b & 0x4000) bolt [2] |= 0x04; // P
+  if (b & 0x02)   bolt [2] |= 0x08; // B
+  if (b & 0x2000) bolt [2] |= 0x10; // L 
+  if (b & 0x04)   bolt [2] |= 0x20; // G
+
+  if (b & 0x1000) bolt [3] |= 0x01; // T
+  if (b & 0x800)  bolt [3] |= 0x02; // S
+  if (b & 0x100)  bolt [3] |= 0x04; // D
+  if (b & 0x400)  bolt [3] |= 0x08; // Z
+  if (b & 0x20)   bolt [3] |= 0x10; // #7 
+
+  for (int i = 0; i <NO_BOLT; i++) Serial.write (bolt [i]);
+  delay (20); // wait a bit before scanning again
+}
+
 void serial_protocol(){
   Serial.begin(9600);
   delay(3000); // Apparently Arduino Micro needs this
   while(true){
     scan();
-    sendPR();
+//    sendPR();
+    sendTX ();
   }
 }
 
