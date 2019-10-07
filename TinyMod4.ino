@@ -558,16 +558,32 @@ void sendTX () {
   delay (20); // wait a bit before scanning again
 }
 
-void serial_protocol(){
+// void serial_protocol(){
+//  Serial.begin(9600);
+//  delay(3000); // Apparently Arduino Micro needs this
+//  while(true){
+//    scan();
+//    sendPR();
+//    sendTX ();
+//  }
+// }
+
+void start_TX(){
   Serial.begin(9600);
   delay(3000); // Apparently Arduino Micro needs this
   while(true){
     scan();
-//    sendPR();
     sendTX ();
   }
 }
-
+void start_PR(){
+  Serial.begin(9600);
+  delay(3000); // Apparently Arduino Micro needs this
+  while(true){
+    scan();
+    sendPR();
+  }
+}
 
 /* End of application words */
 /* ******************************************** */
@@ -724,9 +740,10 @@ void interpret () {
 void setup() {
   INIT();
   if (digitalRead (PROTOCOL)) {
-    serial_protocol ();
+    start_TX ();
   } else {
     NKRO ();
+//    start_PR ();
 //    AtoZ ();
   }
 }
