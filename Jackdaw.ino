@@ -12,15 +12,12 @@ byte left = 0;
 byte center = 0;
 byte right = 0;
 int controller = 0;
-boolean star = false;
 boolean number = false;
 boolean caps = false;
-boolean vowels = false;
-boolean leaving = false;
 boolean ekey = false;
 boolean ykey = false;
-// space keys
-byte spacing = 0;
+boolean spacing = false;
+boolean autospace = true;
 
 int read_raw_keys () {
   int a=0;
@@ -49,59 +46,7 @@ unsigned int raw_keys=0;
 unsigned int serial_keys1=0;
 unsigned int serial_keys2=0;
 
-// allow key repeat for some keys
-void moving(byte x) {
-  int a = 0;
-  int b = 0;
-  int c = 0;
-  Keyboard.press(x);
-  do {
-    a = read_AB (i2c1 );
-    b = read_raw_keys ();
-    c = read_AB (i2c2);
-  } while (a | b | c);
-  Keyboard.release(x);
-}
-
-boolean movement () {
-  if ((raw_keys == 0) & (serial_keys1 == 0) & (serial_keys2 == 0x0080)) {
-    moving (KEY_BACKSPACE);
-    return true;
-  }
-}
-
-/*
-boolean movement() {
-  if((data[0] == 0x00) & (data[4] == 0x00) & (data[2] == 0x0f)) {
-    if(data[1] == 0x01) {moving(KEY_LEFT_ARROW); return true;}
-    if(data[3] == 0x02) {moving(KEY_UP_ARROW); return true;}
-    if(data[1] == 0x02) {moving(KEY_DOWN_ARROW); return true;}
-    if(data[1] == 0x04) {moving(KEY_RIGHT_ARROW); return true;}
-  }
-  if((data[0] == 0x00) & (data[1] == 0x01) &
-      (data[2] == 0x06) & (data[3] == 0x06) & (data[4] == 0x06)) {
-    moving(KEY_BACKSPACE); spacing = false; return true;
-  }
-  return false;
-}
-
-// wait for keypress and scan until all released
-void scan(){
-  leaving = false;
-  do {
-    for(int i=0; i<NO_BYTES; i++) data[i] = 0;
-    do {look();} while(!pressed); delay(20);
-  } while(!pressed);
-  do {
-    look();
-    if (movement()) {leaving = true; return;}
-  } while(pressed);
-}
-
-*/
-
 void scan () {
-  leaving = false;
   int a = 0; int b = 0; int c = 0;
   serial_keys1 = 0;
   serial_keys2 = 0;
@@ -124,20 +69,19 @@ void scan () {
     serial_keys1 |= a;
     raw_keys |= b;
     serial_keys2 |= c;
-//    if (movement ()) {leaving = true; return;}
   } while ((a != 0) | (b != 0) | (c != 0));  // pressed
 }
 
 void organize(){
   left = 0;
-  if (serial_keys2 & 0x4000) left |= 0x01; // a
-  if (serial_keys2 & 0x2000) left |= 0x04; // c
-  if (serial_keys2 & 0x1000) left |= 0x10; // w
-  if (serial_keys2 & 0x0800) left |= 0x40; // n
-  if (serial_keys2 & 0x0002) left |= 0x02; // s
-  if (serial_keys2 & 0x0004) left |= 0x08; // t
-  if (serial_keys2 & 0x0008) left |= 0x20; // h
-  if (serial_keys2 & 0x0010) left |= 0x80; // r
+  if (serial_keys2 & 0x2000) left |= 0x01; // a
+  if (serial_keys2 & 0x1000) left |= 0x04; // c
+  if (serial_keys2 & 0x0800) left |= 0x10; // w
+  if (serial_keys1 & 0x8000) left |= 0x40; // n
+  if (serial_keys2 & 0x0004) left |= 0x02; // s
+  if (serial_keys2 & 0x0008) left |= 0x08; // t
+  if (serial_keys2 & 0x0010) left |= 0x20; // h
+  if (serial_keys1 & 0x0001) left |= 0x80; // r
   center = 0;
   if (raw_keys & 0x01) center |= 0x01; // i
   if (raw_keys & 0x02) center |= 0x02; // e
@@ -145,30 +89,25 @@ void organize(){
   if (raw_keys & 0x08) center |= 0x08; // o
   if ( serial_keys2 & 0x0200) center |= 0x10; // u
   right = 0;
-  if ( serial_keys1 & 0x1000) right |= 0x01; // r
-  if ( serial_keys1 & 0x0800) right |= 0x04; // l
-  if ( serial_keys1 & 0x0400) right |= 0x10; // c
-  if ( serial_keys1 & 0x0200) right |= 0x40; // t
-  if ( serial_keys1 & 0x0008) right |= 0x02; // n
-  if ( serial_keys1 & 0x0010) right |= 0x08; // g
-  if ( serial_keys1 & 0x0020) right |= 0x20; // h
-  if ( serial_keys1 & 0x0040) right |= 0x80; // s
-  ekey = false; if ( serial_keys1 & 0x0100) ekey = true;
-  ykey = false; if ( serial_keys1 & 0x0080) ykey = true;
-  spacing = 0;
-  if (serial_keys1 & 0x8000) spacing |= 0x01;
-  if (serial_keys1 & 0x0001) spacing |= 0x02;
-  if (serial_keys1 & 0x2000) spacing |= 0x04;
-  if (serial_keys1 & 0x0004) spacing |= 0x08;
-  if ((serial_keys2 & 0x0001) | (serial_keys2 & 0x8000)) caps = true;
+  if ( serial_keys1 & 0x2000) right |= 0x01; // r
+  if ( serial_keys1 & 0x1000) right |= 0x04; // l
+  if ( serial_keys1 & 0x0800) right |= 0x10; // c
+  if ( serial_keys1 & 0x0400) right |= 0x40; // t
+  if ( serial_keys1 & 0x0004) right |= 0x02; // n
+  if ( serial_keys1 & 0x0008) right |= 0x08; // g
+  if ( serial_keys1 & 0x0010) right |= 0x20; // h
+  if ( serial_keys1 & 0x0020) right |= 0x80; // s
+  ekey = false; if ( serial_keys1 & 0x0200) ekey = true;
+  ykey = false; if ( serial_keys1 & 0x0040) ykey = true;
+  spacing = false;
+  if (serial_keys1 & 0x4000) spacing = true;
+  if (serial_keys1 & 0x0002) spacing = true;
   controller = 0;
   if (serial_keys2 & 0x0020) controller |= 0x01;
   if (serial_keys2 & 0x0040) controller |= 0x02;
   if (serial_keys2 & 0x0100) controller |= 0x04;
   if (serial_keys2 & 0x0400) controller |= 0x08;
   if (serial_keys2 & 0x0080) controller |= 0x10;
-  if (serial_keys2 & 0x4000) controller |= 0x20;
-  if (serial_keys2 & 0x0002) controller |= 0x40;
   number = false;
   if (serial_keys2 & 0x0080) number = true;
 } 
@@ -232,7 +171,7 @@ const char l26[] PROGMEM = "sch"; // sch
 const char l27[] PROGMEM = ""; //asch
 const char l28[] PROGMEM = "th"; // th
 const char l29[] PROGMEM = "ath"; // ath
-const char l2a[] PROGMEM = ""; // sth
+const char l2a[] PROGMEM = "'"; // sth
 const char l2b[] PROGMEM = "asth"; // asth
 const char l2c[] PROGMEM = "f"; // cth
 const char l2d[] PROGMEM = "af"; // acth
@@ -294,7 +233,7 @@ const char l64[] PROGMEM = "cy"; // chn
 const char l65[] PROGMEM = "acc"; // achn
 const char l66[] PROGMEM = ""; // schn
 const char l67[] PROGMEM = ""; // aschn
-const char l68[] PROGMEM =  "ty"; // thn
+const char l68[] PROGMEM = "ty"; // thn
 const char l69[] PROGMEM = ""; // athn
 const char l6a[] PROGMEM = "sty"; // sthn
 const char l6b[] PROGMEM = ""; // asthn
@@ -360,7 +299,7 @@ const char la6[] PROGMEM = ""; // schr
 const char la7[] PROGMEM = ""; // aschr
 const char la8[] PROGMEM = "thr"; // thr
 const char la9[] PROGMEM = ""; // athr
-const char laa[] PROGMEM = "'"; // sthr
+const char laa[] PROGMEM = ""; // sthr
 const char lab[] PROGMEM = ""; // asthr
 const char lac[] PROGMEM = "fr"; // cthr
 const char lad[] PROGMEM = "afr"; // acthr
@@ -487,76 +426,6 @@ void sendLeft() {
   strcpy_P(buffer, (char*)pgm_read_word(&(left_side[left])));
   spit(buffer);
 }
-
-/*
-// thumb strings with number key
-const char cn0[] PROGMEM = "";
-const char cn1[] PROGMEM = "ia"; // A
-const char cn2[] PROGMEM = "oo"; // O
-const char cn3[] PROGMEM = "ao"; // AO
-const char cn4[] PROGMEM = "ee"; // E
-const char cn5[] PROGMEM = "ae"; // AE
-const char cn6[] PROGMEM = "eo"; // OE
-const char cn7[] PROGMEM = "ei"; // AOE
-const char cn8[] PROGMEM = "ua"; // U
-const char cn9[] PROGMEM = "";
-const char cn10[] PROGMEM = "uo"; // OU
-const char cn11[] PROGMEM = "";
-const char cn12[] PROGMEM = "eu"; // EU
-const char cn13[] PROGMEM = "";
-const char cn14[] PROGMEM = "io"; // OEU
-const char cn15[] PROGMEM = "";
-
-const char* const center_number_side[] PROGMEM = {
-  cn0, cn1, cn2, cn3, cn4, cn5, cn6, cn7,
-  cn8, cn9,cn10, cn11, cn12, cn13, cn14, cn15,
-};
-
-const char c00[] PROGMEM = "";
-const char c01[] PROGMEM = "i";
-const char c02[] PROGMEM = "e";
-const char c03[] PROGMEM = "ie";
-const char c04[] PROGMEM = "a";
-const char c05[] PROGMEM = "ia";
-const char c06[] PROGMEM = "ea";
-const char c07[] PROGMEM = "iea";
-const char c08[] PROGMEM = "o";
-const char c09[] PROGMEM = "io";
-const char c0a[] PROGMEM = "eo";
-const char c0b[] PROGMEM = "ieo";
-const char c0c[] PROGMEM = "ao";
-const char c0d[] PROGMEM = "iao";
-const char c0e[] PROGMEM = "eao";
-const char c0f[] PROGMEM = "ieao";
-const char c10[] PROGMEM = "u";
-const char c11[] PROGMEM = "iu";
-const char c12[] PROGMEM = "eu";
-const char c13[] PROGMEM = "ieu";
-const char c14[] PROGMEM = "au";
-const char c15[] PROGMEM = "iau";
-const char c16[] PROGMEM = "eau";
-const char c17[] PROGMEM = "ieau";
-const char c18[] PROGMEM = "ou";
-const char c19[] PROGMEM = "iou";
-const char c1a[] PROGMEM = "eou";
-const char c1b[] PROGMEM = "ieou";
-const char c1c[] PROGMEM = "aou";
-const char c1d[] PROGMEM = "iaou";
-const char c1e[] PROGMEM = "eaou";
-const char c1f[] PROGMEM = "ieaou";
-const char* const center_side[] PROGMEM = {
-  c00, c01, c02, c03, c04, c05, c06, c07,
-  c08, c09, c0a, c0b, c0c, c0d, c0e, c0f,
-  c10, c11, c12, c13, c14, c15, c16, c17,
-  c18, c19, c1a, c1b, c1c, c1d, c1e, c1f
-};
-
-void sendCenter() {
-  char buffer[10];
-  strcpy_P(buffer, (char*)pgm_read_word(&(center_side[center])));
-  spit(buffer); return;
-}
-*/
 
 void sendCenter () {
   if (center & 0x01) {
@@ -919,14 +788,16 @@ void sendRight() {
   if (ykey) spit("y");
 }
 
+// shift gets some punctuation
 void numbers () {
+  if (center & 0x04) Keyboard.press (KEY_LEFT_SHIFT);
   if (serial_keys2 & 0x0100) {
-    if (right & 0x40) spit ("0");
-    if (right & 0x10) spit ("9");
-    if (right & 0x04) spit ("8");
-    if (right & 0x01) spit ("7");
-    if (spacing & 0x04) spit ("6");
-    if (spacing & 0x01) spit ("5");
+    if (right & 0x40) spit ("9");
+    if (right & 0x10) spit ("8");
+    if (right & 0x04) spit ("7");
+    if (right & 0x01) spit ("6");
+    if (center & 0x02) spit ("0");
+    if (center & 0x01) spit ("5");
     if (left & 0x40) spit ("4");
     if (left & 0x10) spit ("3");
     if (left & 0x04) spit ("2");
@@ -936,51 +807,159 @@ void numbers () {
     if (left & 0x04) spit ("2");
     if (left & 0x10) spit ("3");
     if (left & 0x40) spit ("4");
-    if (spacing & 0x01) spit ("5");
-    if (spacing & 0x04) spit ("6");
-    if (right & 0x01) spit ("7");
-    if (right & 0x04) spit ("8");
-    if (right & 0x10) spit ("9");
-    if (right & 0x40) spit ("0");
+    if (center & 0x01) spit ("5");
+    if (center & 0x02) spit ("0");
+    if (right & 0x01) spit ("6");
+    if (right & 0x04) spit ("7");
+    if (right & 0x10) spit ("8");
+    if (right & 0x40) spit ("9");
   }
+  Keyboard.releaseAll ();
 }
 
 void run() {
   scan ();
-//  if(leaving) return;
   organize ();
+  if ((controller == 0x08) & ((center == 0) | (center == 0x01))) {
+    caps = true; 
+  }
+  if (controller == 0x06) {
+    if (autospace) {
+      autospace = false;
+    } else {
+      autospace = true;
+    }
+    return;
+  }
+  if ((controller == 0x09) & (center == 0)) Keyboard.write (KEY_CAPS_LOCK);
+  if (spacing & number) {
+    if (left == 0xaa) {
+      Keyboard.write (KEY_DELETE);
+    } else {
+      Keyboard.write (KEY_BACKSPACE);
+    }
+    return;
+  }
   if (number) {
     numbers ();
     return;
   }
+  if ((center == 0) & (left == 0xa0) & (right == 0x0a)) {
+    Keyboard.write (KEY_RETURN); return;
+  }
+  if ((center == 0) & (left == 0x50) & (right == 0x05)) {
+    Keyboard.write (KEY_TAB); return;
+  }
   if ((left == 0x55) & (right == 0x55)) {
-    Keyboard.write (KEY_ESC);
+    Keyboard.write (KEY_ESC); return;
+  }
+  if (left == 0xaa) {
+    if ((right == 0) & (center == 0) & !number & !spacing) {
+      Keyboard.releaseAll (); return;
+    }
+    if (right == 0x0a) {
+      Keyboard.press (KEY_LEFT_CTRL);
+      Keyboard.write (KEY_LEFT_ARROW);
+      Keyboard.release (KEY_LEFT_CTRL);
+      return;
+    }
+    if (right == 0xa0) {
+      Keyboard.press (KEY_LEFT_CTRL);
+      Keyboard.write (KEY_RIGHT_ARROW);
+      Keyboard.release (KEY_LEFT_CTRL);
+      return;
+    }
+    if (center == 0x01) Keyboard.press (KEY_LEFT_SHIFT);
+    if (center == 0x02) Keyboard.press (KEY_LEFT_CTRL);
+    if (center == 0x08) Keyboard.press (KEY_LEFT_ALT);
+    if (center == 0x10) Keyboard.press (KEY_LEFT_GUI);
+    if (spacing & number) {
+      Keyboard.write (KEY_DELETE);
+      return;
+    }
+    if (right == 0x01) {
+      Keyboard.write (KEY_HOME);
+      return;
+    }
+    if (right == 0x40) {
+      Keyboard.write (KEY_END);
+      return;
+    }
+    if (right == 0x04) {
+      Keyboard.write (KEY_PAGE_UP);
+      return;
+    }
+    if (right == 0x10) {
+      Keyboard.write (KEY_PAGE_DOWN);
+      return;
+    }
+    if (right == 0x02) {
+      Keyboard.write (KEY_LEFT_ARROW);
+//      Keyboard.releaseAll ();
+      return;
+    }
+    if (right == 0x08) {
+      Keyboard.write (KEY_UP_ARROW);
+//      Keyboard.releaseAll ();
+      return;
+    }
+    if (right == 0x20) {
+      Keyboard.write (KEY_DOWN_ARROW);
+//      Keyboard.releaseAll ();
+      return;
+    }
+    if (right == 0x80) {
+      Keyboard.write (KEY_RIGHT_ARROW);
+//      Keyboard.releaseAll ();
+      return;
+    }
     return;
   }
-  if (spacing == 0x05) {spit ("."); return;}
-  if (spacing == 0x0a) {spit (","); return;}
-  if (spacing == 0x06) {spit ("?"); return;}
-  if (spacing == 0x09) {spit ("!"); return;}
-  if (spacing) Keyboard.print (" ");
-//  if ((number) & (left == 0) & (right == 0) & (center == 0) & !star) {
-//    Keyboard.write (' '); return;
-//  }
-//  if ((star) & (left == 0) & (right == 0) & (center == 0) & !number) {
-//    Keyboard.write (KEY_BACKSPACE); return;
-//  }
-//  maybeSpace();
-//  if ((number) & (!star) & (!center)) {numbers(); return;}
-//  if (commands()) return;
-//  if (briefs()) return;
-  sendLeft();
+
+  if (right == 0x55) {
+    if (left == 0x90) spit ("(");
+    if (left == 0xb0) spit ("[");
+    if (left == 0x94) spit ("{");
+    if (left == 0x98) spit ("<");
+    if (left == 0x03) spit (":");
+    if (left == 0x0c) spit ("\"");
+    if (left == 0x30) spit ("|");
+    if (left == 0x50) spit ("-");
+    if (left == 0x5a) spit ("/");
+    if (left == 0xf0) spit ("+");
+    return;
+  }
+  if (right == 0xa9) {
+    if (left == 0x90) spit (")");
+    if (left == 0xb0) spit ("]");
+    if (left == 0x94) spit ("}");
+    if (left == 0x98) spit (">");
+    if (left == 0x03) spit (";");
+    if (left == 0x0c) spit ("\"");
+    if (left == 0x30) spit ("~");
+    if (left == 0x50) spit ("_");
+    if (left == 0x5a) spit ("\\");
+    if (left == 0xf0) spit ("=");
+    return;
+  }
+  if ((left == 0x14) & (right == 0x14) & (center == 0)) {
+    spit ("."); return;
+  }
+  if ((left == 0x28) & (right == 0x28) & (center == 0)) {
+    spit (","); return;
+  }
+  if ((left == 0x28) & (right == 0x14) & (center == 0)) {
+    spit ("?"); return;
+  }
+  if ((left == 0x14) & (right == 0x28) & (center == 0)) {
+    spit ("!"); return;
+  }
+  if ((spacing) & (!autospace)) Keyboard.print (" ");
+  if ((!spacing) & (autospace)) Keyboard.print (" ");
+//    spacing = true;
+  sendLeft(); 
   sendCenter();
   sendRight();
-  if (serial_keys1 & 0x4000) {  // cr
-    Keyboard.print ("\n");
-  }
-  if (serial_keys1 & 0x0002) {  // backspace
-    Keyboard.print ("\b");
-  }
 }
 
 void setup() {
@@ -1005,31 +984,6 @@ void setup() {
   Wire.write (0xff);
   Wire.endTransmission ();
   delay (3000);
-}
-
-void test_loop() {
-//  delay (1000);
-  scan ();
-  organize ();
-//  raw_keys = read_raw_keys ();
-//  serial_keys1 = read_AB (i2c1);
-//  serial_keys2 = read_AB (i2c2);
-  Serial.print (raw_keys, HEX);
-  Serial.print (" ");
-  Serial.print (serial_keys1, HEX);
-  Serial.print (" ");
-  Serial.print (" ");
-  Serial.print (serial_keys2, HEX);
-  Serial.println ();
-  Serial.print (left, HEX);
-  Serial.print (" ");
-  Serial.print (center, HEX);
-  Serial.print (" ");
-  Serial.print (right, HEX);
-  Serial.println ();
-  Serial.println ();
-
-//  run();
 }
 
 void loop () {
