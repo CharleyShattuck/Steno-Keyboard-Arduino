@@ -281,7 +281,7 @@ const char l94[] PROGMEM = "pr"; // cwr
 const char l95[] PROGMEM = "apr"; // acwr
 const char l96[] PROGMEM = "spr"; // scwr
 const char l97[] PROGMEM = "appr"; // ascwr 
-const char l98[] PROGMEM = ""; // twr
+const char l98[] PROGMEM = "qu"; // twr
 const char l99[] PROGMEM = "attr"; // atwr
 const char l9a[] PROGMEM = "xr"; // stwr
 const char l9b[] PROGMEM = ""; // astwr
@@ -490,7 +490,7 @@ const char r1a[] PROGMEM = "gg";
 const char r1b[] PROGMEM = "";
 const char r1c[] PROGMEM = "bl";
 const char r1d[] PROGMEM = "";
-const char r1e[] PROGMEM = "ld";
+const char r1e[] PROGMEM = "ld"; // CWS 25Jan20
 const char r1f[] PROGMEM = "lb";
 const char r20[] PROGMEM = "h";
 const char r21[] PROGMEM = "w";
@@ -543,7 +543,7 @@ const char r4f[] PROGMEM = "lk";
 const char r50[] PROGMEM = "ct";
 const char r51[] PROGMEM = "";
 const char r52[] PROGMEM = "tion";
-const char r53[] PROGMEM = "";
+const char r53[] PROGMEM = "ction"; // CWS 25Jan20
 const char r54[] PROGMEM = "pt";
 const char r55[] PROGMEM = "";
 const char r56[] PROGMEM = "nst";
@@ -790,7 +790,7 @@ void sendRight() {
 
 // shift gets some punctuation
 void numbers () {
-  if (center & 0x04) Keyboard.press (KEY_LEFT_SHIFT);
+//  if (center & 0x04) Keyboard.press (KEY_LEFT_SHIFT);
   if (serial_keys2 & 0x0100) {
     if (right & 0x40) spit ("9");
     if (right & 0x10) spit ("8");
@@ -814,7 +814,7 @@ void numbers () {
     if (right & 0x10) spit ("8");
     if (right & 0x40) spit ("9");
   }
-  Keyboard.releaseAll ();
+//  Keyboard.releaseAll ();
 }
 
 void run() {
@@ -823,12 +823,13 @@ void run() {
   if ((controller == 0x08) & ((center == 0) | (center == 0x01))) {
     caps = true; 
   }
-  if (controller == 0x06) {
-    if (autospace) {
-      autospace = false;
-    } else {
-      autospace = true;
-    }
+  if ((controller == 0x06) & (center == 0)) {
+    autospace = !autospace;
+//    if (autospace) {
+//      autospace = false;
+//    } else {
+//      autospace = true;
+//    }
     return;
   }
   if ((controller == 0x09) & (center == 0)) Keyboard.write (KEY_CAPS_LOCK);
@@ -915,7 +916,6 @@ void run() {
     }
     return;
   }
-
   if (right == 0x55) {
     if (left == 0x90) spit ("(");
     if (left == 0xb0) spit ("[");
@@ -924,9 +924,17 @@ void run() {
     if (left == 0x03) spit (":");
     if (left == 0x0c) spit ("\"");
     if (left == 0x30) spit ("|");
+    if (left == 0x05) spit ("@");
+    if (left == 0x0a) spit ("$");
     if (left == 0x50) spit ("-");
+    if (left == 0xa0) spit ("^");
     if (left == 0x5a) spit ("/");
-    if (left == 0xf0) spit ("+");
+    if (left == 0xc0) spit ("+");
+    if (left == 0xf0) spit ("*");
+    if (left == 0x01) spit (".");
+    if (left == 0x04) spit (",");
+    if (left == 0x10) spit ("?");
+    if (left == 0x40) spit ("!");
     return;
   }
   if (right == 0xa9) {
@@ -935,28 +943,33 @@ void run() {
     if (left == 0x94) spit ("}");
     if (left == 0x98) spit (">");
     if (left == 0x03) spit (";");
-    if (left == 0x0c) spit ("\"");
+    if (left == 0x0c) spit ("\'");
     if (left == 0x30) spit ("~");
+    if (left == 0x05) spit ("#");
+    if (left == 0x0a) spit ("%");
     if (left == 0x50) spit ("_");
+    if (left == 0xa0) spit ("&");
     if (left == 0x5a) spit ("\\");
-    if (left == 0xf0) spit ("=");
+    if (left == 0xc0) spit ("=");
     return;
   }
-  if ((left == 0x14) & (right == 0x14) & (center == 0)) {
-    spit ("."); return;
+  if ((left == 0x14) & (center == 0)) {
+    if (right == 0x14) {spit ("."); caps = true; return;}
+    if (right == 0x28) {spit ("!"); caps = true; return;}
   }
-  if ((left == 0x28) & (right == 0x28) & (center == 0)) {
-    spit (","); return;
+  if ((left == 0x28) & (center == 0)) {
+    if (right == 0x14) {spit ("?"); caps = true; return;}
+    if (right == 0x28) {spit (","); return;}
   }
-  if ((left == 0x28) & (right == 0x14) & (center == 0)) {
-    spit ("?"); return;
+  if ((spacing) & (center == 0) & (left == 0) &
+      (right == 0) & (controller == 0) & (!ekey) & (!ykey)) {
+    Keyboard.print (" ");
+    return;
   }
-  if ((left == 0x14) & (right == 0x28) & (center == 0)) {
-    spit ("!"); return;
+  if (((spacing) & (!autospace)) | ((!spacing) & (autospace))) {
+    Keyboard.print (" ");
+//    spacing = false;
   }
-  if ((spacing) & (!autospace)) Keyboard.print (" ");
-  if ((!spacing) & (autospace)) Keyboard.print (" ");
-//    spacing = true;
   sendLeft(); 
   sendCenter();
   sendRight();
