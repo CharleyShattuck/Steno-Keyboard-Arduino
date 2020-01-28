@@ -268,7 +268,7 @@ const char l87[] PROGMEM = "ascr"; // ascr
 const char l88[] PROGMEM = "tr";  // tr 
 const char l89[] PROGMEM = "atr"; // atr
 const char l8a[] PROGMEM = "str"; // str
-const char l8b[] PROGMEM = ""; // astr 
+const char l8b[] PROGMEM = "astr"; // astr 
 const char l8c[] PROGMEM = "dr"; // ctr
 const char l8d[] PROGMEM = "adr"; // actr
 const char l8e[] PROGMEM = "gr"; // sctr
@@ -404,7 +404,7 @@ const char* const left_side[] PROGMEM = {
   l70, l71, l72, l73, l74, l75, l76, l77,
   l78, l79, l7a, l7b, l7c, l7d, l7e, l7f,
   l80, l81, l82, l83, l84, l85, l86, l87,
-  l88, l89, l8a, l8b, l4c, l4d, l8e, l8f,
+  l88, l89, l8a, l8b, l8c, l8d, l8e, l8f,
   l90, l91, l92, l93, l94, l95, l96, l97,
   l98, l99, l9a, l9b, l9c, l9d, l9e, l9f,
   la0, la1, la2, la3, la4, la5, la6, la7,
