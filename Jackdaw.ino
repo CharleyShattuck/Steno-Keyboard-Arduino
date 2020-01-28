@@ -817,6 +817,16 @@ void numbers () {
 //  Keyboard.releaseAll ();
 }
 
+void unspace () {
+  Keyboard.press (KEY_LEFT_CTRL);
+  Keyboard.write (KEY_LEFT_ARROW);
+  Keyboard.release (KEY_LEFT_CTRL);
+  Keyboard.write (KEY_BACKSPACE);
+  Keyboard.press (KEY_LEFT_CTRL);
+  Keyboard.write (KEY_RIGHT_ARROW);
+  Keyboard.release (KEY_LEFT_CTRL);
+}
+
 void run() {
   scan ();
   organize ();
@@ -825,11 +835,6 @@ void run() {
   }
   if ((controller == 0x06) & (center == 0)) {
     autospace = !autospace;
-//    if (autospace) {
-//      autospace = false;
-//    } else {
-//      autospace = true;
-//    }
     return;
   }
   if ((controller == 0x09) & (center == 0)) Keyboard.write (KEY_CAPS_LOCK);
@@ -858,6 +863,7 @@ void run() {
     if ((right == 0) & (center == 0) & !number & !spacing) {
       Keyboard.releaseAll (); return;
     }
+    if (right == 0x2a) {unspace (); return;}
     if (right == 0x0a) {
       Keyboard.press (KEY_LEFT_CTRL);
       Keyboard.write (KEY_LEFT_ARROW);
