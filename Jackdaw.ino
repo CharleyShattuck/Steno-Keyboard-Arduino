@@ -1,4 +1,4 @@
- // This example program is in the public domain
+// This example program is in the public domain
 #include <Keyboard.h>
 #include <Wire.h>
 
@@ -107,7 +107,7 @@ void organize(){
   if (serial_keys2 & 0x0040) controller |= 0x02;
   if (serial_keys2 & 0x0100) controller |= 0x04;
   if (serial_keys2 & 0x0400) controller |= 0x08;
-  if (serial_keys2 & 0x0080) controller |= 0x10;
+//  if (serial_keys2 & 0x0080) controller |= 0x10;
   number = false;
   if (serial_keys2 & 0x0080) number = true;
 } 
@@ -830,21 +830,29 @@ void unspace () {
 void run() {
   scan ();
   organize ();
-  if ((controller == 0x08) & ((center == 0) | (center == 0x01))) {
+//                   ...x     not o or u      
+  if ((controller == 0x08) & ((center & 0x18) == 0)) {
     caps = true; 
   }
+//                   .xx.     no vowels
   if ((controller == 0x06) & (center == 0)) {
     autospace = !autospace;
     return;
   }
+//                   x..x     no vowels
   if ((controller == 0x09) & (center == 0)) Keyboard.write (KEY_CAPS_LOCK);
-  if (spacing & number) {
+//  if (spacing & number) {
+  if (spacing & !number & (center == 0) & (right == 0)) {
     if (left == 0xaa) {
       Keyboard.write (KEY_DELETE);
     } else {
       Keyboard.write (KEY_BACKSPACE);
     }
     return;
+  }
+  if (number & (left == 0) & (right == 0)
+     & (center == 0) & (controller == 0)) {
+    Keyboard.print (" ");
   }
   if (number) {
     numbers ();
@@ -967,11 +975,11 @@ void run() {
     if (right == 0x14) {spit ("?"); caps = true; return;}
     if (right == 0x28) {spit (","); return;}
   }
-  if ((spacing) & (center == 0) & (left == 0) &
-      (right == 0) & (controller == 0) & (!ekey) & (!ykey)) {
-    Keyboard.print (" ");
-    return;
-  }
+//  if ((spacing) & (center == 0) & (left == 0) &
+//      (right == 0) & (controller == 0) & (!ekey) & (!ykey)) {
+//    Keyboard.print (" ");
+//    return;
+//  }
   if (((spacing) & (!autospace)) | ((!spacing) & (autospace))) {
     Keyboard.print (" ");
 //    spacing = false;
