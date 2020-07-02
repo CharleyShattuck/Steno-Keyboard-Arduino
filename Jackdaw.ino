@@ -29,6 +29,7 @@ int read_raw_keys () {
   return a;
 }
 
+// read the i2c port expander with the given address
 unsigned int read_AB (int address) {
   Wire.beginTransmission (address);
   Wire.write (0x12);  // GPIOA
@@ -42,10 +43,12 @@ unsigned int read_AB (int address) {
   return a;
 }
 
+// global variables keep track of keys stroked
 unsigned int raw_keys=0;
 unsigned int serial_keys1=0;
 unsigned int serial_keys2=0;
 
+// read and accumulate keys until all released
 void scan () {
   int a = 0; int b = 0; int c = 0;
   serial_keys1 = 0;
@@ -72,8 +75,9 @@ void scan () {
   } while ((a != 0) | (b != 0) | (c != 0));  // pressed
 }
 
+// translate scan into a hardware neutral representation
 void organize(){
-  left = 0;
+  left = 0; // initial consonants
   if (serial_keys2 & 0x2000) left |= 0x01; // a
   if (serial_keys2 & 0x1000) left |= 0x04; // c
   if (serial_keys2 & 0x0800) left |= 0x10; // w
@@ -82,13 +86,13 @@ void organize(){
   if (serial_keys2 & 0x0008) left |= 0x08; // t
   if (serial_keys2 & 0x0010) left |= 0x20; // h
   if (serial_keys1 & 0x0001) left |= 0x80; // r
-  center = 0;
+  center = 0; // vowels
   if (raw_keys & 0x01) center |= 0x01; // i
   if (raw_keys & 0x02) center |= 0x02; // e
   if (raw_keys & 0x04) center |= 0x04; // a
   if (raw_keys & 0x08) center |= 0x08; // o
   if ( serial_keys2 & 0x0200) center |= 0x10; // u
-  right = 0;
+  right = 0; // final consonants
   if ( serial_keys1 & 0x2000) right |= 0x01; // r
   if ( serial_keys1 & 0x1000) right |= 0x04; // l
   if ( serial_keys1 & 0x0800) right |= 0x10; // c
@@ -100,19 +104,18 @@ void organize(){
   ekey = false; if ( serial_keys1 & 0x0200) ekey = true;
   ykey = false; if ( serial_keys1 & 0x0040) ykey = true;
   spacing = false;
-  if (serial_keys1 & 0x4000) spacing = true;
-  if (serial_keys1 & 0x0002) spacing = true;
-  controller = 0;
+  if (serial_keys1 & 0x4000) spacing = true; // *
+  if (serial_keys1 & 0x0002) spacing = true; // *
+  controller = 0; // 5 keys beyond the basic TinyMod
   if (serial_keys2 & 0x0020) controller |= 0x01;
   if (serial_keys2 & 0x0040) controller |= 0x02;
   if (serial_keys2 & 0x0100) controller |= 0x04;
   if (serial_keys2 & 0x0400) controller |= 0x08;
-//  if (serial_keys2 & 0x0080) controller |= 0x10;
   number = false;
   if (serial_keys2 & 0x0080) number = true;
 } 
 
-
+// optionally capitalize first character of the string
 void spit(String a) {
   if(a.length() == 0) return;
   if(caps) {
@@ -421,6 +424,7 @@ const char* const left_side[] PROGMEM = {
   lf8, lf9, lfa, lfb, lfc, lfd, lfe, lff
 };
 
+// lookup string using key stroke as index and print it
 void sendLeft() {
   char buffer[10];
   strcpy_P(buffer, (char*)pgm_read_word(&(left_side[left])));
@@ -467,24 +471,24 @@ const char r03[] PROGMEM = "rn";
 const char r04[] PROGMEM = "l";
 const char r05[] PROGMEM = "rl";
 const char r06[] PROGMEM = "s";
-const char r07[] PROGMEM = "ll";
+const char r07[] PROGMEM = "ll"; // rnl
 const char r08[] PROGMEM = "g";
 const char r09[] PROGMEM = "rg";
 const char r0a[] PROGMEM = "ng"; 
-const char r0b[] PROGMEM = "gn"; 
+const char r0b[] PROGMEM = "gn"; // rng
 const char r0c[] PROGMEM = "lg";
 const char r0d[] PROGMEM = "";
-const char r0e[] PROGMEM = "d";
-const char r0f[] PROGMEM = "dl";
+const char r0e[] PROGMEM = "d"; // npg
+const char r0f[] PROGMEM = "dl"; // rnlg
 const char r10[] PROGMEM = "c";
 const char r11[] PROGMEM = "rc";
 const char r12[] PROGMEM = "nc";
 const char r13[] PROGMEM = "";
-const char r14[] PROGMEM = "p";
-const char r15[] PROGMEM = "rp";
-const char r16[] PROGMEM = "sp";
-const char r17[] PROGMEM = "pl";
-const char r18[] PROGMEM = "b";
+const char r14[] PROGMEM = "p"; // lc
+const char r15[] PROGMEM = "rp"; // rlc
+const char r16[] PROGMEM = "sp"; // nlc
+const char r17[] PROGMEM = "pl"; // rnlc
+const char r18[] PROGMEM = "b"; // gc
 const char r19[] PROGMEM = "rb";
 const char r1a[] PROGMEM = "gg";
 const char r1b[] PROGMEM = "";
@@ -782,16 +786,17 @@ void sendRight() {
       return;
     }
   }
+// lookup string using stroke as index and print
   strcpy_P(buffer, (char*)pgm_read_word(&(right_side[right])));
   spit(buffer);
   if (ekey) spit("e");
   if (ykey) spit("y");
 }
 
-// shift gets some punctuation
+// if we're here then the number key was pressed
 void numbers () {
-//  if (center & 0x04) Keyboard.press (KEY_LEFT_SHIFT);
-  if (serial_keys2 & 0x0100) {
+//  if (serial_keys2 & 0x0100) {
+  if (controller == 0x04) {
     if (right & 0x40) spit ("9");
     if (right & 0x10) spit ("8");
     if (right & 0x04) spit ("7");
@@ -814,7 +819,6 @@ void numbers () {
     if (right & 0x10) spit ("8");
     if (right & 0x40) spit ("9");
   }
-//  Keyboard.releaseAll ();
 }
 
 void unspace () {
@@ -844,11 +848,11 @@ void run() {
 //  if (spacing & number) {
   if (spacing & !number & (center == 0) & (right == 0)) {
     if (left == 0xaa) {
-      Keyboard.write (KEY_DELETE);
-    } else {
-      Keyboard.write (KEY_BACKSPACE);
+      Keyboard.write (KEY_DELETE); return;
     }
-    return;
+    if (left == 0) {
+      Keyboard.write (KEY_BACKSPACE); return;
+    }
   }
   if (number & (left == 0) & (right == 0)
      & (center == 0) & (controller == 0)) {
@@ -878,7 +882,7 @@ void run() {
       Keyboard.release (KEY_LEFT_CTRL);
       return;
     }
-    if (right == 0xa0) {
+    if (right == 0x28) {
       Keyboard.press (KEY_LEFT_CTRL);
       Keyboard.write (KEY_RIGHT_ARROW);
       Keyboard.release (KEY_LEFT_CTRL);
