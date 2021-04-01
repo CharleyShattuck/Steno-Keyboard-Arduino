@@ -11,7 +11,10 @@ int I = 0; // instruction pointer
 int W = 0; // working register
 
 const int memory [] {
-  1, 2, 3, 0,
+  1, // print A
+  2, // delay 1 sec
+  3, // branch
+  0, // to this address
 };
 
 void runForth () {
