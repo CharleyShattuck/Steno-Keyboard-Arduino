@@ -740,7 +740,8 @@ void interpret () {
 void setup() {
   INIT();
   if (digitalRead (PROTOCOL)) {
-    start_TX ();
+//    start_TX ();
+    start_PR ();
   } else {
     NKRO ();
 //    start_PR ();
